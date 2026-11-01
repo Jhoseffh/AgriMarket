@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriMarket - Home</title>
+    <title>AgriMarket - Shop</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -541,7 +542,6 @@
             grid-row:1 / 3;
         }
 
-        /* Slots 2 and 3 stay aligned with the main slot */
         .hero-slot:nth-child(2),
         .hero-slot:nth-child(3) {
             transform:none;
@@ -571,7 +571,7 @@
         }
 
         .product-card:hover .placeholder::before {
-            transform: rotate(-18deg) translateX(80%);
+            transform:rotate(-18deg) translateX(80%);
         }
 
         .hero-slot:hover .placeholder::before,
@@ -1256,7 +1256,7 @@
         <a href="#" class="brand">
             <i class="fa-solid fa-leaf"></i>
             <span>agrimarket</span>
-            
+
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
 
@@ -1268,7 +1268,7 @@
             @if (Auth::check())
                 {{ Auth::user()->name }}
             @endif
-            
+
         </a>
 
         <!-- SEARCH -->
@@ -1682,50 +1682,54 @@
 
     <script>
         const products = {
-        "New & Fresh":[
-            @php
-                $newFreshProducts = $products->filter(function ($product) {
-                    return $product->created_at >= now()->subHours(24);
-                });
-
-                if ($newFreshProducts->isEmpty()) {
+            "New & Fresh":[
+                @php
                     $newFreshProducts = $products->filter(function ($product) {
-                        return $product->created_at >= now()->subDays(2);
+                        return $product->created_at >= now()->subHours(24);
                     });
-                }
 
-                if ($newFreshProducts->isEmpty()) {
-                    $newFreshProducts = $products->filter(function ($product) {
-                        return $product->created_at >= now()->subDays(3);
-                    });
-                }
+                    if ($newFreshProducts->isEmpty()) {
+                        $newFreshProducts = $products->filter(function ($product) {
+                            return $product->created_at >= now()->subDays(2);
+                        });
+                    }
 
-                $newFreshProducts = $newFreshProducts
-                    ->sortByDesc('product_id')
-                    ->take(6);
-            @endphp
+                    if ($newFreshProducts->isEmpty()) {
+                        $newFreshProducts = $products->filter(function ($product) {
+                            return $product->created_at >= now()->subDays(3);
+                        });
+                    }
 
-            @foreach($newFreshProducts as $product)
-                [
-                    @json($product->product_name),
-                    {{ $product->price }},
-                    {{ $product->quantity }},
-                    @json($product->oum),
-                    @json($product->image)
-                ],
-            @endforeach
-        ],
-            "Best Sellers":[
-                ["Premium Rice",89,45,"kg"],
-                ["Fresh Bananas",65,28,"kg"],
-                ["Native Garlic",78,22,"kg"],
-                ["Red Onion",82,26,"kg"],
-                ["Fresh Coconut",60,35,"piece"],
-                ["Farm Eggs",92,24,"dozen"]
+                    $newFreshProducts = $newFreshProducts
+                        ->sortByDesc('product_id')
+                        ->take(6);
+                @endphp
+
+                @foreach($newFreshProducts as $product)
+                    [
+                        {{ $product->product_id }},
+                        @json($product->product_name),
+                        {{ $product->price }},
+                        {{ $product->quantity }},
+                        @json($product->oum),
+                        @json($product->image)
+                    ],
+                @endforeach
             ],
+
+            "Best Sellers":[
+                [null,"Premium Rice",89,45,"kg",""],
+                [null,"Fresh Bananas",65,28,"kg",""],
+                [null,"Native Garlic",78,22,"kg",""],
+                [null,"Red Onion",82,26,"kg",""],
+                [null,"Fresh Coconut",60,35,"piece",""],
+                [null,"Farm Eggs",92,24,"dozen",""]
+            ],
+
             "Fruits":[
                 @foreach($products->where('category','Fruits')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1734,9 +1738,11 @@
                     ],
                 @endforeach
             ],
+
             "Vegetables":[
                 @foreach($products->where('category','Vegetables')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1745,9 +1751,11 @@
                     ],
                 @endforeach
             ],
+
             "Grains & Rice":[
                 @foreach($products->where('category','Grains & Rice')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1756,9 +1764,11 @@
                     ],
                 @endforeach
             ],
+
             "Seeds":[
                 @foreach($products->where('category','Seeds')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1767,9 +1777,11 @@
                     ],
                 @endforeach
             ],
+
             "Organic Products":[
                 @foreach($products->where('category','Organic Products')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1778,9 +1790,11 @@
                     ],
                 @endforeach
             ],
+
             "Herbs & Spices":[
                 @foreach($products->where('category','Herbs & Spices')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1789,9 +1803,11 @@
                     ],
                 @endforeach
             ],
+
             "Meat & Poultry":[
                 @foreach($products->where('category','Meat & Poultry')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1800,9 +1816,11 @@
                     ],
                 @endforeach
             ],
+
             "Fish & Seafood":[
                 @foreach($products->where('category','Fish & Seafood')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1811,9 +1829,11 @@
                     ],
                 @endforeach
             ],
+
             "Dairy & Eggs":[
                 @foreach($products->where('category','Dairy & Eggs')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1822,9 +1842,11 @@
                     ],
                 @endforeach
             ],
+
             "Processed Foods":[
                 @foreach($products->where('category','Processed Foods')->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1833,9 +1855,11 @@
                     ],
                 @endforeach
             ],
+
             "Below ₱100":[
                 @foreach($products->where('price', '<', 100)->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1844,9 +1868,11 @@
                     ],
                 @endforeach
             ],
+
             "All Groceries":[
                 @foreach($products->shuffle()->take(6) as $product)
                     [
+                        {{ $product->product_id }},
                         @json($product->product_name),
                         {{ $product->price }},
                         {{ $product->quantity }},
@@ -1875,7 +1901,7 @@
         ];
 
         function productCard(product,index) {
-            const [name,price,quantity,uom,image] = product;
+            const [id,name,price,quantity,uom,image] = product;
 
             const escapedName = String(name)
                 .replace(/&/g,"&amp;")
@@ -1949,7 +1975,7 @@
                                 <i class="fa-solid fa-cart-plus"></i>
                                 Add to Cart
                             </button>
-                            <button class="card-btn buy-btn" onclick="buyNow('${String(name).replace(/\\/g,"\\\\").replace(/'/g,"\\'")}')">
+                            <button class="card-btn buy-btn" onclick="buyNow(${id === null ? 'null' : Number(id)})">
                                 Buy Now
                             </button>
                         </div>
@@ -2089,8 +2115,33 @@
             showToast(`${name} was added to your cart.`);
         }
 
-        function buyNow(name) {
-            showToast(`Buy Now selected for ${name}. Connect this to your checkout route.`);
+        // BUY NOW: Submit the actual database product ID using POST.
+        function buyNow(productId) {
+            if (!Number.isInteger(productId) || productId <= 0) {
+                showToast("This demo product cannot be purchased. Please select an available product.");
+                return;
+            }
+
+            const form = document.createElement("form");
+
+            form.method = "POST";
+            form.action = "{{ route('ordersummary') }}";
+
+            const csrf = document.createElement("input");
+            csrf.type = "hidden";
+            csrf.name = "_token";
+            csrf.value = "{{ csrf_token() }}";
+
+            const productInput = document.createElement("input");
+            productInput.type = "hidden";
+            productInput.name = "product_id";
+            productInput.value = productId;
+
+            form.appendChild(csrf);
+            form.appendChild(productInput);
+
+            document.body.appendChild(form);
+            form.submit();
         }
 
         function showToast(message) {

@@ -1,28 +1,47 @@
 <?php
+
 namespace App\Http\Controllers;
 
+
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 
 class ShopController extends Controller
 {
+    /**
+     * Get all available products except products owned by the logged-in user.
+     */
+    private function visibleProducts(): Builder
+    {
+        return Product::query()
+            ->where('status', '!=', 'unavailable')
+            ->when(auth()->check(), function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNull('seller_id')
+                      ->orWhere('seller_id', '!=', auth()->id());
+                });
+            });
+    }
+
     public function shop()
     {
-        $products = Product::orderBy('product_id', 'desc')->get();
+        $products = $this->visibleProducts()
+            ->orderBy('product_id', 'desc')
+            ->get();
 
         return view('shop.shop', compact('products'));
     }
 
     public function search($product_name)
     {
-        $products = Product::where(
-            'product_name',
-            'LIKE',
-            '%' . $product_name . '%'
-        )
-        ->orderBy('product_id', 'desc')
-        ->get();
+        $products = $this->visibleProducts()
+            ->where('product_name', 'LIKE', '%' . $product_name . '%')
+            ->orderBy('product_id', 'desc')
+            ->get();
 
-        $allProducts = Product::orderBy('product_id', 'desc')->get();
+        $allProducts = $this->visibleProducts()
+            ->orderBy('product_id', 'desc')
+            ->get();
 
         return view('shop.search', compact(
             'products',
@@ -50,7 +69,7 @@ class ShopController extends Controller
             'All Products'
         ];
 
-        // Match category without considering uppercase or lowercase
+        // Match category without considering uppercase or lowercase.
         $matchedCategory = collect($categories)->first(function ($item) use ($category) {
             return strtolower($item) === strtolower($category);
         });
@@ -59,43 +78,59 @@ class ShopController extends Controller
             abort(404);
         }
 
-        // Use the original category capitalization
+        // Use the original category capitalization.
         $category = $matchedCategory;
 
         if ($category === 'All Products') {
-            $products = Product::orderBy('product_id', 'desc')->get();
+
+            $products = $this->visibleProducts()
+                ->orderBy('product_id', 'desc')
+                ->get();
 
         } elseif ($category === 'Below 100') {
-            $products = Product::where('price', '<', 100)
+
+            $products = $this->visibleProducts()
+                ->where('price', '<', 100)
                 ->orderBy('product_id', 'desc')
                 ->get();
 
         } elseif ($category === 'New Arrivals') {
 
-            $products = Product::where('created_at', '>=', now()->subHours(24))
+            $products = $this->visibleProducts()
+                ->where('created_at', '>=', now()->subHours(24))
                 ->orderBy('product_id', 'desc')
                 ->get();
 
             if ($products->isEmpty()) {
-                $products = Product::where('created_at', '>=', now()->subDays(2))
+                $products = $this->visibleProducts()
+                    ->where('created_at', '>=', now()->subDays(2))
                     ->orderBy('product_id', 'desc')
                     ->get();
             }
 
             if ($products->isEmpty()) {
-                $products = Product::where('created_at', '>=', now()->subDays(3))
+                $products = $this->visibleProducts()
+                    ->where('created_at', '>=', now()->subDays(3))
                     ->orderBy('product_id', 'desc')
                     ->get();
             }
 
         } else {
-            $products = Product::where('category', $category)
+
+            $products = $this->visibleProducts()
+                ->where('category', $category)
                 ->orderBy('product_id', 'desc')
                 ->get();
         }
 
-        $allProducts = Product::orderBy('product_id', 'desc')->get();
+        $allProducts = $this->visibleProducts()
+            ->orderBy('product_id', 'desc')
+            ->get();
 
-        return view('shop.category', compact('products', 'category', 'allProducts'));
+        return view('shop.category', compact(
+            'products',
+            'category',
+            'allProducts'
+        ));
     }
 }

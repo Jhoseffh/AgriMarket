@@ -562,6 +562,146 @@ main{
     outline:0;
 }
 
+.stock-add-btn{
+    background:var(--primary-dark);
+    border-color:var(--primary-dark);
+    color:#fff;
+}
+
+.stock-add-btn:hover{
+    background:var(--primary-green);
+    border-color:var(--primary-green);
+    color:#fff;
+}
+
+.stock-section{
+    opacity:1;
+    visibility:visible;
+    transform:none;
+    filter:none;
+}
+
+.stock-section .stock-grid > .product-card{
+    opacity:1;
+    transform:none;
+    transition:transform .35s var(--spring),box-shadow .35s ease,border-color .35s ease;
+}
+
+.qty-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+    transform:none;
+}
+
+.qty-btn:disabled:hover{
+    background:#fff;
+    color:var(--primary-green);
+}
+
+.stock-form{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:13px;
+}
+
+.stock-form-group{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.stock-form-group.full{
+    grid-column:1 / -1;
+}
+
+.stock-form-group label{
+    color:var(--primary-dark);
+    font-size:.7rem;
+    font-weight:800;
+}
+
+.stock-form-group input,
+.stock-form-group select{
+    width:100%;
+    min-height:42px;
+    padding:9px 11px;
+    border:1px solid var(--border-color);
+    border-radius:9px;
+    outline:0;
+    background:#fff;
+    color:var(--text-main);
+    font-size:.76rem;
+}
+
+.stock-form-group input:focus,
+.stock-form-group select:focus{
+    border-color:var(--primary-green);
+    box-shadow:0 0 0 3px rgba(45,90,63,.09);
+}
+
+.stock-form-help{
+    color:var(--text-muted);
+    font-size:.62rem;
+}
+
+.stock-form-error{
+    display:none;
+    grid-column:1 / -1;
+    padding:10px 12px;
+    border-radius:9px;
+    background:var(--soft-terracotta);
+    color:#a33d2c;
+    font-size:.72rem;
+    font-weight:700;
+}
+
+.stock-form-error.show{
+    display:block;
+}
+
+.stock-form-submit{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    grid-column:1 / -1;
+    margin-top:4px;
+}
+
+.stock-form-submit button{
+    min-height:39px;
+    padding:0 15px;
+    border:0;
+    border-radius:9px;
+    font-size:.7rem;
+    font-weight:800;
+}
+
+.stock-cancel-btn{
+    background:var(--soft-green);
+    color:var(--primary-dark);
+}
+
+.stock-save-btn{
+    background:var(--primary-dark);
+    color:#fff;
+}
+
+.stock-save-btn:hover{
+    background:var(--primary-green);
+}
+
+.stock-save-btn:disabled{
+    opacity:.6;
+    cursor:wait;
+}
+
+@media(max-width:650px){
+    .stock-form{grid-template-columns:1fr;}
+    .stock-form-group.full{grid-column:auto;}
+    .stock-form-submit{grid-column:auto;}
+}
+
 /* =========================
    MY STOCKS
 ========================= */
@@ -1757,7 +1897,7 @@ footer{
             </div>
 
             <div class="stat-label">Total Products</div>
-            <div class="stat-value" id="totalOrders">24</div>
+            <div class="stat-value" id="totalProducts">{{ $totalProducts }}</div>
             <div class="stat-sub">All products available</div>
         </article>
 
@@ -1769,7 +1909,7 @@ footer{
             </div>
 
             <div class="stat-label">Pending Requests</div>
-            <div class="stat-value" id="pendingRequests">3</div>
+            <div class="stat-value" id="pendingRequests"></div>
             <div class="stat-sub">Waiting for your action</div>
         </article>
 
@@ -1781,7 +1921,7 @@ footer{
             </div>
 
             <div class="stat-label">Shipping</div>
-            <div class="stat-value" id="shippingOrders">8</div>
+            <div class="stat-value" id="shippingOrders"></div>
             <div class="stat-sub">Orders currently shipping</div>
         </article>
 
@@ -1793,7 +1933,7 @@ footer{
             </div>
 
             <div class="stat-label">Completed</div>
-            <div class="stat-value" id="completedOrders">13</div>
+            <div class="stat-value" id="completedOrders"></div>
             <div class="stat-sub">Successfully completed</div>
         </article>
 
@@ -1805,7 +1945,7 @@ footer{
             </div>
 
             <div class="stat-label">Total Sales</div>
-            <div class="stat-value" id="totalSales">₱18,450</div>
+            <div class="stat-value" id="totalSales"></div>
             <div class="stat-sub">Current recorded sales</div>
         </article>
 
@@ -1867,7 +2007,7 @@ footer{
      3. MY STOCKS
 ========================= -->
 
-<section class="section reveal">
+<section class="section stock-section" id="myStockSection">
 
     <div class="section-heading">
 
@@ -1878,29 +2018,81 @@ footer{
         </div>
 
         <div class="section-tools">
-
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input
-                    type="search"
-                    id="stockSearch"
-                    placeholder="Search My Stocks..."
-                    aria-label="Search My Stocks"
-                >
+                <input type="search" id="stockSearch" placeholder="Search My Stocks..." aria-label="Search My Stocks">
             </div>
 
-            <button class="control-btn" id="addStockButton">
+            <button type="button" class="control-btn stock-add-btn" id="addStockButton">
                 <i class="fa-solid fa-plus"></i>
                 Add Item
             </button>
-
         </div>
 
     </div>
 
     <div class="stocks-container" id="stocksContainer">
-        <div class="stock-grid stagger" id="stockGrid"></div>
+        <div class="stock-grid" id="stockGrid">
+            @forelse($products as $product)
+                <article class="product-card" data-product-id="{{ $product->product_id }}" data-name="{{ strtolower($product->product_name) }}">
+                    @if((int) $product->quantity === 0)
+                        <span class="stock-badge" style="background:#b42318;">OUT OF STOCK</span>
+                    @elseif((int) $product->quantity <= 10)
+                        <span class="stock-badge" style="background:var(--accent-terracotta);">LOW STOCK</span>
+                    @else
+                        <span class="stock-badge">IN STOCK</span>
+                    @endif
+
+                    <div class="product-image">
+                        @if(!empty($product->image))
+                            <img src="{{ asset('image/product/' . $product->image) }}" alt="{{ $product->product_name }}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                        @else
+                            <div class="placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-regular fa-image"></i>
+                                    <strong>PRODUCT IMAGE</strong>
+                                    <small>{{ $product->product_name }}</small>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="stock-info">
+                        <div class="product-name">{{ $product->product_name }}</div>
+                        <div class="product-price">₱{{ number_format((float) $product->price, 2) }}</div>
+                        <div class="product-meta">
+                            <span>{{ $product->oum }}</span>
+                            <span class="stock-status-text">{{ (int) $product->quantity === 0 ? 'Out of Stock' : ((int) $product->quantity <= 10 ? 'Low Stock' : 'In Stock') }}</span>
+                        </div>
+
+                        <div class="quantity-control">
+                            <button type="button" class="qty-btn" data-quantity-action="less" data-product-id="{{ $product->product_id }}" aria-label="Decrease {{ $product->product_name }} quantity" {{ (int) $product->quantity <= 0 ? 'disabled' : '' }}>
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+
+                            <span class="qty-value" data-quantity-value>Quantity: {{ $product->quantity }}</span>
+
+                            <button type="button" class="qty-btn" data-quantity-action="add" data-product-id="{{ $product->product_id }}" aria-label="Increase {{ $product->product_name }} quantity">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+
+                        <div class="stock-actions">
+                            <button type="button" class="remove-btn" data-remove-product="{{ $product->product_id }}">
+                                <i class="fa-regular fa-trash-can"></i>
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            @empty
+                <div class="empty-state stock-empty-state" style="grid-column:1/-1">
+                    <i class="fa-solid fa-box-open"></i>
+                    <h3>No products found</h3>
+                    <p>Your listed products will appear here.</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 
 </section>
@@ -2132,367 +2324,158 @@ footer{
 </div>
 
 <!-- =========================
-     ADD STOCK MODAL
+     ADD STOCK ITEM MODAL
 ========================= -->
 
 <div class="modal-overlay" id="addStockModal">
-
     <div class="modal">
-
         <div class="modal-header">
-
             <div>
-                <div class="modal-title">Add Stock Item</div>
-                <div class="modal-subtitle">
-                    Add a new product to your current stocks
-                </div>
+                <div class="modal-title">Add Item to My Stock</div>
+                <div class="modal-subtitle">Enter the product details below.</div>
             </div>
-
-            <button class="modal-close" onclick="closeModal('addStockModal')">
+            <button type="button" class="modal-close" onclick="closeModal('addStockModal')" aria-label="Close">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-
         </div>
 
-        <div class="modal-body">
+        <form id="addStockForm" class="modal-body stock-form" enctype="multipart/form-data">
+            @csrf
+            <div class="stock-form-error" id="stockFormError" role="alert"></div>
 
-            <div class="detail-grid">
-
-                <div class="detail-item full">
-                    <div class="detail-label">Product Name</div>
-
-                    <input
-                        id="newStockName"
-                        type="text"
-                        placeholder="Enter product name"
-                        style="width:100%;margin-top:6px;border:1px solid var(--border-color);border-radius:8px;padding:9px;outline:0;font-size:.75rem;"
-                    >
-                </div>
-                
-
-                <div class="detail-item full">
-                    <div class="detail-label">Product Image</div>
-                    <input id="newStockImage" type="file" accept="image/*" style="width:100%;margin-top:6px;border:1px solid var(--border-color);border-radius:8px;padding:8px;background:#fff;outline:0;font-size:.75rem;">
-                </div>
-
-                <div class="detail-item">
-
-                    <div class="detail-label">Price</div>
-
-                    <input
-                        id="newStockPrice"
-                        type="number"
-                        min="0"
-                        placeholder="0"
-                        style="width:100%;margin-top:6px;border:1px solid var(--border-color);border-radius:8px;padding:9px;outline:0;font-size:.75rem;"
-                    >
-
-                </div>
-
-                <div class="detail-item">
-
-                    <div class="detail-label">Quantity</div>
-
-                    <input
-                        id="newStockQuantity"
-                        type="number"
-                        min="1"
-                        value="1"
-                        style="width:100%;margin-top:6px;border:1px solid var(--border-color);border-radius:8px;padding:9px;outline:0;font-size:.75rem;"
-                    >
-
-                </div>
-
+            <div class="stock-form-group full">
+                <label for="stockProductName">Product Name</label>
+                <input type="text" id="stockProductName" name="product_name" maxlength="255" pattern="[A-Za-z]+( [A-Za-z]+)*" title="Use alphabetic letters only. Numbers, spaces, and special symbols are not allowed." autocomplete="off" required>
             </div>
 
-        </div>
+            <div class="stock-form-group">
+                <label for="stockCategory">Category</label>
+                <select id="stockCategory" name="category" required>
+                    <option value="" selected disabled>Select a category</option>
+                    <option value="Fruits">Fruits</option>
+                    <option value="Vegetables">Vegetables</option>
+                    <option value="Grains &amp; Rice">Grains &amp; Rice</option>
+                    <option value="Seeds">Seeds</option>
+                    <option value="Organic Products">Organic Products</option>
+                    <option value="Herbs &amp; Spices">Herbs &amp; Spices</option>
+                    <option value="Meat &amp; Poultry">Meat &amp; Poultry</option>
+                    <option value="Fish &amp; Seafood">Fish &amp; Seafood</option>
+                    <option value="Dairy &amp; Eggs">Dairy &amp; Eggs</option>
+                    <option value="Processed Foods">Processed Foods</option>
+                </select>
+            </div>
 
-        <div class="modal-footer">
+            <div class="stock-form-group">
+                <label for="stockPrice">Price (₱)</label>
+                <input type="number" id="stockPrice" name="price" min="0" step="0.01" required>
+            </div>
 
-            <button class="modal-action decline" onclick="closeModal('addStockModal')">
-                Cancel
-            </button>
+            <div class="stock-form-group">
+                <label for="stockQuantity">Quantity</label>
+                <input type="number" id="stockQuantity" name="quantity" min="0" step="1" required>
+            </div>
 
-            <button class="modal-action primary" onclick="addStock()">
-                <i class="fa-solid fa-plus"></i>
-                Add Item
-            </button>
+            <div class="stock-form-group">
+                <label for="stockOum">Unit of Measurement</label>
+                <input type="text" id="stockOum" name="oum" maxlength="50" pattern="[A-Za-z]+( [A-Za-z]+)*" title="Use alphabetic letters only. Numbers, spaces, and special symbols are not allowed." placeholder="e.g. kg, piece, sack" autocomplete="off" required>
+            </div>
 
-        </div>
+            <div class="stock-form-group full">
+                <label for="stockImage">Product Image <span aria-hidden="true">*</span></label>
+                <input type="file" id="stockImage" name="image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+                <span class="stock-form-help">Required. JPG, JPEG, PNG, or WEBP. Maximum file size: 5 MB.</span>
+            </div>
 
+            <div class="stock-form-submit">
+                <button type="button" class="stock-cancel-btn" onclick="closeModal('addStockModal')">Cancel</button>
+                <button type="submit" class="stock-save-btn" id="saveStockButton">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Product
+                </button>
+            </div>
+        </form>
     </div>
-
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
 
+
+@php
+    $transactionRows = collect($transactions ?? [])->map(function ($transaction) {
+        $transactionId = data_get($transaction, 'order_id')
+            ?: data_get($transaction, 'transaction_id')
+            ?: data_get($transaction, 'id');
+
+        $createdAt = data_get($transaction, 'created_at');
+
+        return [
+            'id' => (string) ($transactionId ?? ''),
+            'customer' => (string) data_get($transaction, 'customer_name', ''),
+            'address' => (string) data_get($transaction, 'address', ''),
+            'mobile' => (string) data_get($transaction, 'mobile_number', ''),
+            'date' => $createdAt
+                ? \Carbon\Carbon::parse($createdAt)->format('F d, Y')
+                : '—',
+            'products' => [[
+                'name' => (string) data_get($transaction, 'product_name', ''),
+                'quantity' => (int) data_get($transaction, 'quantity', 0),
+                'price' => data_get($transaction, 'product_price'),
+            ]],
+            'total' => (float) data_get($transaction, 'total_amount', 0),
+            'status' => ucfirst(strtolower((string) data_get($transaction, 'status', 'Shipping'))),
+        ];
+    })->values();
+
+    $requestRows = collect($orderRequests ?? [])->map(function ($request) {
+        $createdAt = data_get($request, 'created_at');
+
+        return [
+            'id' => (string) (data_get($request, 'request_id') ?? data_get($request, 'id', '')),
+            'orderId' => data_get($request, 'order_id'),
+            'customer' => (string) data_get($request, 'customer_name', ''),
+            'address' => (string) data_get($request, 'address', ''),
+            'mobile' => (string) data_get($request, 'mobile_number', ''),
+            'date' => $createdAt
+                ? \Carbon\Carbon::parse($createdAt)->format('F d, Y')
+                : '—',
+            'products' => [[
+                'name' => (string) data_get($request, 'product_name', ''),
+                'quantity' => (int) data_get($request, 'quantity', 0),
+                'price' => data_get($request, 'product_price'),
+            ]],
+            'total' => (float) data_get($request, 'total_amount', 0),
+        ];
+    })->values();
+@endphp
+
 <script>
 
-let stockData = [
-    {
-        id:1,
-        name:"Premium Rice",
-        price:89,
-        quantity:24,
-        unit:"1 kg",
-        status:"In Stock"
-    },
-    {
-        id:2,
-        name:"Carabao Mango",
-        price:95,
-        quantity:18,
-        unit:"1 kg",
-        status:"In Stock"
-    },
-    {
-        id:3,
-        name:"Fresh Tomatoes",
-        price:72,
-        quantity:12,
-        unit:"1 kg",
-        status:"In Stock"
-    },
-    {
-        id:4,
-        name:"Native Garlic",
-        price:78,
-        quantity:8,
-        unit:"250 g",
-        status:"Low Stock"
-    },
-    {
-        id:5,
-        name:"Farm Eggs",
-        price:92,
-        quantity:30,
-        unit:"12 pcs",
-        status:"In Stock"
-    },
-    {
-        id:6,
-        name:"Organic Honey",
-        price:99,
-        quantity:6,
-        unit:"250 ml",
-        status:"Low Stock"
-    },
-    {
-        id:7,
-        name:"Fresh Bananas",
-        price:65,
-        quantity:21,
-        unit:"1 kg",
-        status:"In Stock"
-    },
-    {
-        id:8,
-        name:"Garden Seeds",
-        price:45,
-        quantity:15,
-        unit:"Pack",
-        status:"In Stock"
-    },
-    {
-        id:9,
-        name:"Organic Compost",
-        price:95,
-        quantity:5,
-        unit:"1 kg",
-        status:"Low Stock"
-    },
-    {
-        id:10,
-        name:"Fresh Lettuce",
-        price:55,
-        quantity:17,
-        unit:"Bundle",
-        status:"In Stock"
-    },
-    {
-        id:11,
-        name:"Sweet Corn",
-        price:65,
-        quantity:10,
-        unit:"6 pcs",
-        status:"In Stock"
-    },
-    {
-        id:12,
-        name:"Red Onion",
-        price:82,
-        quantity:7,
-        unit:"1 kg",
-        status:"Low Stock"
-    }
-];
+let transactionData = @json($transactionRows);
 
-let transactionData = [
-    {
-        id:"ORD-1001",
-        customer:"Maria Santos",
-        address:"Baliuag, Bulacan",
-        mobile:"0918 234 5678",
-        date:"September 28, 2026",
-        products:[
-            {name:"Premium Rice",quantity:3,price:89}
-        ],
-        total:267,
-        status:"Shipping"
-    },
-    {
-        id:"ORD-1002",
-        customer:"Pedro Reyes",
-        address:"Cabanatuan City",
-        mobile:"0920 345 6789",
-        date:"September 27, 2026",
-        products:[
-            {name:"Carabao Mango",quantity:4,price:95}
-        ],
-        total:380,
-        status:"Completed"
-    },
-    {
-        id:"ORD-1003",
-        customer:"Ana Cruz",
-        address:"Gapan City, Nueva Ecija",
-        mobile:"0917 456 7890",
-        date:"September 27, 2026",
-        products:[
-            {name:"Fresh Tomatoes",quantity:5,price:72}
-        ],
-        total:360,
-        status:"Shipping"
-    },
-    {
-        id:"ORD-1004",
-        customer:"Jose Garcia",
-        address:"San Leonardo, Nueva Ecija",
-        mobile:"0921 567 8901",
-        date:"September 26, 2026",
-        products:[
-            {name:"Farm Eggs",quantity:2,price:92},
-            {name:"Fresh Bananas",quantity:1,price:65}
-        ],
-        total:249,
-        status:"Completed"
-    },
-    {
-        id:"ORD-1005",
-        customer:"Liza Mendoza",
-        address:"Talavera, Nueva Ecija",
-        mobile:"0919 678 9012",
-        date:"September 25, 2026",
-        products:[
-            {name:"Native Garlic",quantity:4,price:78}
-        ],
-        total:312,
-        status:"Shipping"
-    },
-    {
-        id:"ORD-1006",
-        customer:"Mark Villanueva",
-        address:"Muñoz, Nueva Ecija",
-        mobile:"0922 789 0123",
-        date:"September 24, 2026",
-        products:[
-            {name:"Organic Honey",quantity:3,price:99}
-        ],
-        total:297,
-        status:"Completed"
-    },
-    {
-        id:"ORD-1007",
-        customer:"Ramon Flores",
-        address:"Guimba, Nueva Ecija",
-        mobile:"0916 890 1234",
-        date:"September 23, 2026",
-        products:[
-            {name:"Red Onion",quantity:5,price:82}
-        ],
-        total:410,
-        status:"Shipping"
-    },
-    {
-        id:"ORD-1008",
-        customer:"Sofia Navarro",
-        address:"San Jose City, Nueva Ecija",
-        mobile:"0923 901 2345",
-        date:"September 22, 2026",
-        products:[
-            {name:"Fresh Lettuce",quantity:6,price:55}
-        ],
-        total:330,
-        status:"Completed"
-    }
-];
+let requestData = @json($requestRows);
 
-let requestData = [
-    {
-        id:"REQ-2001",
-        customer:"Carlos Aquino",
-        address:"Gapan City, Nueva Ecija",
-        mobile:"0917 111 2233",
-        date:"September 29, 2026",
-        products:[
-            {name:"Premium Rice",quantity:5,price:89}
-        ],
-        total:445
-    },
-    {
-        id:"REQ-2002",
-        customer:"Elena Ramos",
-        address:"Cabanatuan City",
-        mobile:"0920 222 3344",
-        date:"September 29, 2026",
-        products:[
-            {name:"Carabao Mango",quantity:3,price:95}
-        ],
-        total:285
-    },
-    {
-        id:"REQ-2003",
-        customer:"Daniel Torres",
-        address:"Talavera, Nueva Ecija",
-        mobile:"0918 333 4455",
-        date:"September 28, 2026",
-        products:[
-            {name:"Fresh Tomatoes",quantity:4,price:72}
-        ],
-        total:288
-    },
-    {
-        id:"REQ-2004",
-        customer:"Grace Bautista",
-        address:"San Leonardo, Nueva Ecija",
-        mobile:"0919 444 5566",
-        date:"September 28, 2026",
-        products:[
-            {name:"Farm Eggs",quantity:3,price:92}
-        ],
-        total:276
-    },
-    {
-        id:"REQ-2005",
-        customer:"Michael Dizon",
-        address:"Baliuag, Bulacan",
-        mobile:"0921 555 6677",
-        date:"September 27, 2026",
-        products:[
-            {name:"Organic Honey",quantity:2,price:99}
-        ],
-        total:198
-    }
-];
-
-
-const API_CONFIG = window.MY_ORDERS_CONFIG || {
-    updateStock:null,
-    removeStock:null,
-    addStock:null,
-    acceptRequest:null,
-    declineRequest:null
+/*
+ * Order request actions use the authenticated PATCH routes in web.php.
+ * The backend performs the database insert/delete operations.
+ */
+const API_CONFIG = {
+    acceptRequest: @json(url('/orders/requests')),
+    declineRequest: @json(url('/orders/requests')),
+    csrf: @json(csrf_token())
 };
+
+const requestBusy = new Set();
+
+/* Removed hardcoded sample transaction and request arrays. */
+
+const STOCK_API = {
+    add: @json(route('orders.products.add')),
+    quantity: @json(url('/orders/products')),
+    remove: @json(url('/orders/products')),
+    csrf: @json(csrf_token())
+};
+
+const stockBusyProducts = new Set();
 
 /* =========================
    HELPERS
@@ -2550,251 +2533,21 @@ function showToast(message){
 }
 
 /* =========================
-   STOCKS
+   STATISTICS
 ========================= */
 
-function renderStocks(data=stockData){
-    const grid=document.getElementById("stockGrid");
+function updateStatistics(){
+    const pending = requestData.length;
+    const shipping = transactionData.filter(item => item.status === "Shipping").length;
+    const completed = transactionData.filter(item => item.status === "Completed").length;
+    const sales = transactionData
+        .filter(item => item.status === "Completed")
+        .reduce((total, item) => total + Number(item.total || 0), 0);
 
-    if(!data.length){
-        grid.innerHTML=`
-            <div class="empty-state" style="grid-column:1/-1">
-                <i class="fa-solid fa-box-open"></i>
-                <h3>No stock items found</h3>
-                <p>Try another product name or add a new item.</p>
-            </div>
-        `;
-        return;
-    }
-
-    grid.innerHTML=data.map(item=>{
-
-        const badge=item.quantity<=8 ? "LOW STOCK" : "IN STOCK";
-
-        return `
-            <article class="product-card" data-stock-id="${item.id}" data-name="${escapeHTML(item.name.toLowerCase())}">
-
-                <span class="stock-badge">${badge}</span>
-
-                <div class="product-image">
-                    ${item.image
-                        ? `<img src="${item.image}" alt="${escapeHTML(item.name)}" style="width:100%;height:100%;object-fit:cover;display:block;">`
-                        : `<div class="placeholder">
-                            <div class="placeholder-content">
-                                <i class="fa-regular fa-image"></i>
-                                <strong>PRODUCT IMAGE</strong>
-                                <small>${escapeHTML(item.name)}</small>
-                            </div>
-                        </div>`
-                    }
-                </div>
-
-                <div class="stock-info">
-
-                    <div class="product-name">
-                        ${escapeHTML(item.name)}
-                    </div>
-
-                    <div class="product-price">
-                        ${peso(item.price)}
-                    </div>
-
-                    <div class="product-meta">
-                        <span>${escapeHTML(item.unit)}</span>
-                        <span>${escapeHTML(item.status)}</span>
-                    </div>
-
-                    <div class="quantity-control">
-
-                        <button
-                            class="qty-btn"
-                            onclick="changeQuantity(${item.id},-1,event)"
-                            title="Decrease quantity"
-                        >
-                            <i class="fa-solid fa-minus"></i>
-                        </button>
-
-                        <span class="qty-value">
-                            ${item.quantity}
-                        </span>
-
-                        <button
-                            class="qty-btn"
-                            onclick="changeQuantity(${item.id},1,event)"
-                            title="Increase quantity"
-                        >
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-
-                    </div>
-
-                    <div class="stock-actions">
-
-                        <button
-                            class="remove-btn"
-                            onclick="removeStock(${item.id},event)"
-                        >
-                            <i class="fa-solid fa-trash"></i>
-                            Remove Item
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </article>
-        `;
-    }).join("");
-
-    observeNewElements();
-}
-
-function changeQuantity(id,change,event){
-    if(event){
-        event.stopPropagation();
-    }
-
-    const item=stockData.find(stock=>stock.id===id);
-
-    if(!item)return;
-
-    item.quantity+=change;
-
-    if(item.quantity<0){
-        item.quantity=0;
-    }
-
-    item.status=item.quantity<=8 ? "Low Stock" : "In Stock";
-
-    renderStocks(getFilteredStocks());
-
-
-
-    showToast(`${item.name} quantity updated to ${item.quantity}.`);
-}
-
-function removeStock(id,event){
-    if(event){
-        event.stopPropagation();
-    }
-
-    const item=stockData.find(stock=>stock.id===id);
-
-    if(!item)return;
-
-    stockData=stockData.filter(stock=>stock.id!==id);
-
-    renderStocks(getFilteredStocks());
-
-
-    showToast(`${item.name} was removed from My Stocks.`);
-}
-
-function getFilteredStocks(){
-    const query=document
-        .getElementById("stockSearch")
-        .value
-        .trim()
-        .toLowerCase();
-
-    if(!query){
-        return stockData;
-    }
-
-    return stockData.filter(item=>
-        item.name.toLowerCase().includes(query)
-    );
-}
-
-function searchStocks(){
-    const query=document
-        .getElementById("stockSearch")
-        .value
-        .trim()
-        .toLowerCase();
-
-    const matches=stockData.filter(item=>
-        item.name.toLowerCase().includes(query)
-    );
-
-    renderStocks(matches);
-
-    if(!query){
-        return;
-    }
-
-    if(!matches.length){
-        showToast(`No stock item found for "${query}".`);
-        return;
-    }
-
-    setTimeout(()=>{
-
-        const card=document.querySelector(
-            `[data-stock-id="${matches[0].id}"]`
-        );
-
-        if(!card)return;
-
-        card.scrollIntoView({
-            behavior:"smooth",
-            block:"center"
-        });
-
-        card.classList.remove("stock-highlight");
-
-        void card.offsetWidth;
-
-        card.classList.add("stock-highlight");
-
-        setTimeout(()=>{
-            card.classList.remove("stock-highlight");
-        },5000);
-
-    },50);
-
-    showToast(
-        `${matches.length} matching stock item${matches.length===1?"":"s"} found.`
-    );
-}
-
-/* =========================
-   ADD STOCK
-========================= */
-
-document.getElementById("addStockButton").addEventListener("click",()=>{
-    openModal("addStockModal");
-});
-
-function addStock(){
-
-    const name=document.getElementById("newStockName").value.trim();
-    const price=Number(document.getElementById("newStockPrice").value);
-    const quantity=Number(document.getElementById("newStockQuantity").value);
-    const imageInput=document.getElementById("newStockImage");
-    const imageFile=imageInput.files[0];
-
-    if(!name){showToast("Enter a product name.");return}
-    if(!price || price<0){showToast("Enter a valid product price.");return}
-    if(!quantity || quantity<1){showToast("Enter a valid quantity.");return}
-    if(imageFile && !imageFile.type.startsWith("image/")){showToast("Please select a valid image file.");return}
-
-    const createStock=(image=null)=>{
-        const newId=stockData.length?Math.max(...stockData.map(item=>item.id))+1:1;
-        stockData.push({id:newId,name:name,price:price,quantity:quantity,unit:"Item",status:quantity<=8?"Low Stock":"In Stock",image:image});
-        renderStocks(getFilteredStocks());
-        closeModal("addStockModal");
-        document.getElementById("newStockName").value="";
-        document.getElementById("newStockPrice").value="";
-        document.getElementById("newStockQuantity").value="1";
-        document.getElementById("newStockImage").value="";
-        showToast(`${name} was added to My Stocks.`);
-    };
-
-    if(!imageFile){createStock();return}
-    const reader=new FileReader();
-    reader.onload=()=>createStock(reader.result);
-    reader.readAsDataURL(imageFile);
+    document.getElementById("pendingRequests").textContent = pending;
+    document.getElementById("shippingOrders").textContent = shipping;
+    document.getElementById("completedOrders").textContent = completed;
+    document.getElementById("totalSales").textContent = peso(sales);
 }
 
 /* =========================
@@ -2903,7 +2656,9 @@ function transactionProductsHTML(products){
             </span>
 
             <span class="detail-product-qty">
-                ${product.quantity} × ${peso(product.price)}
+                ${product.price !== null && product.price !== undefined
+                    ? `${product.quantity} × ${peso(product.price)}`
+                    : `Quantity: ${product.quantity}`}
             </span>
 
         </div>
@@ -3181,98 +2936,104 @@ function openRequest(id){
     openModal("requestModal");
 }
 
-function acceptRequest(id){
+async function acceptRequest(id){
 
-    const request=requestData.find(
-        item=>item.id===id
-    );
+    const request = requestData.find(item => String(item.id) === String(id));
 
-    if(!request)return;
+    if(!request || requestBusy.has(String(id))) return;
 
+    requestBusy.add(String(id));
 
-    requestData=requestData.filter(
-        item=>item.id!==id
-    );
+    try{
+        const response = await fetch(
+            `${API_CONFIG.acceptRequest}/${encodeURIComponent(id)}/accept`,
+            {
+                method:"PATCH",
+                headers:{
+                    "Accept":"application/json",
+                    "X-CSRF-TOKEN":API_CONFIG.csrf,
+                    "X-Requested-With":"XMLHttpRequest"
+                }
+            }
+        );
 
-    transactionData.unshift({
-        id:request.id,
-        customer:request.customer,
-        address:request.address,
-        mobile:request.mobile,
-        date:request.date,
-        products:request.products,
-        total:request.total,
-        status:"Shipping"
-    });
+        const result = await response.json();
 
-    renderRequests();
-    renderTransactions();
-    updateStatistics();
+        if(!response.ok || !result.success){
+            throw new Error(result.message || "Unable to accept this order request.");
+        }
 
-    closeModal("requestModal");
+        // The server has inserted the transaction and deleted the request.
+        requestData = requestData.filter(item => String(item.id) !== String(id));
 
-    showToast(`${request.id} was accepted and moved to Shipping.`);
+        transactionData.unshift({
+            id: request.orderId || request.id,
+            customer: request.customer,
+            address: request.address,
+            mobile: request.mobile,
+            date: request.date,
+            products: request.products,
+            total: request.total,
+            status: "Shipping"
+        });
+
+        renderRequests();
+        renderTransactions();
+        updateStatistics();
+
+        closeModal("requestModal");
+        showToast(result.message || "Order request accepted and added to transactions.");
+
+    }catch(error){
+        showToast(error.message || "An error occurred while accepting the request.");
+    }finally{
+        requestBusy.delete(String(id));
+    }
 }
 
-function declineRequest(id){
+async function declineRequest(id){
 
-    const request=requestData.find(
-        item=>item.id===id
-    );
+    const request = requestData.find(item => String(item.id) === String(id));
 
-    if(!request)return;
+    if(!request || requestBusy.has(String(id))) return;
 
+    requestBusy.add(String(id));
 
-    requestData=requestData.filter(
-        item=>item.id!==id
-    );
+    try{
+        const response = await fetch(
+            `${API_CONFIG.declineRequest}/${encodeURIComponent(id)}/decline`,
+            {
+                method:"PATCH",
+                headers:{
+                    "Accept":"application/json",
+                    "X-CSRF-TOKEN":API_CONFIG.csrf,
+                    "X-Requested-With":"XMLHttpRequest"
+                }
+            }
+        );
 
-    renderRequests();
-    updateStatistics();
+        const result = await response.json();
 
-    closeModal("requestModal");
+        if(!response.ok || !result.success){
+            throw new Error(result.message || "Unable to decline this order request.");
+        }
 
-    showToast(`${request.id} was declined.`);
+        // The server has deleted the request. No transaction is created.
+        requestData = requestData.filter(item => String(item.id) !== String(id));
+
+        renderRequests();
+        updateStatistics();
+
+        closeModal("requestModal");
+        showToast(result.message || "Order request declined and removed.");
+
+    }catch(error){
+        showToast(error.message || "An error occurred while declining the request.");
+    }finally{
+        requestBusy.delete(String(id));
+    }
 }
 
-/* =========================
-   STATISTICS
-========================= */
-
-function updateStatistics(){
-
-    const shipping=transactionData.filter(
-        item=>item.status==="Shipping"
-    ).length;
-
-    const completed=transactionData.filter(
-        item=>item.status==="Completed"
-    ).length;
-
-    const totalOrders=transactionData.length;
-
-    const pending=requestData.length;
-
-    const totalSales=transactionData.reduce(
-        (sum,item)=>sum+Number(item.total),
-        0
-    );
-
-    document.getElementById("totalOrders").textContent=
-        totalOrders;
-
-    document.getElementById("pendingRequests").textContent=
-        pending;
-
-    document.getElementById("shippingOrders").textContent=
-        shipping;
-
-    document.getElementById("completedOrders").textContent=
-        completed;
-
-    document.getElementById("totalSales").textContent=
-        peso(totalSales);
-}
 
 /* =========================
    MODALS
@@ -3314,9 +3075,340 @@ document.querySelectorAll(".modal-overlay").forEach(overlay=>{
    SEARCH / FILTER
 ========================= */
 
-document
-    .getElementById("stockSearch")
-    .addEventListener("input",searchStocks);
+/* =========================
+   MY STOCK DATABASE ACTIONS
+========================= */
+
+function stockStatus(quantity){
+    const qty = Number(quantity);
+    if(qty <= 0) return {label:"Out of Stock", badge:"OUT OF STOCK", color:"#b42318"};
+    if(qty <= 10) return {label:"Low Stock", badge:"LOW STOCK", color:"var(--accent-terracotta)"};
+    return {label:"In Stock", badge:"IN STOCK", color:"var(--primary-green)"};
+}
+
+function stockCardHTML(product){
+    const id = Number(product.product_id);
+    const quantity = Number(product.quantity);
+    const status = stockStatus(quantity);
+    const name = escapeHTML(product.product_name);
+    const image = product.image
+        ? `<img src="${escapeHTML("{{ asset('image/product') }}/")}${encodeURIComponent(product.image)}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+        : `<div class="placeholder"><div class="placeholder-content"><i class="fa-regular fa-image"></i><strong>PRODUCT IMAGE</strong><small>${name}</small></div></div>`;
+
+    return `
+        <article class="product-card" data-product-id="${id}" data-name="${name.toLowerCase()}">
+            <span class="stock-badge" style="background:${status.color};">${status.badge}</span>
+            <div class="product-image">${image}</div>
+            <div class="stock-info">
+                <div class="product-name">${name}</div>
+                <div class="product-price">${peso(product.price)}</div>
+                <div class="product-meta">
+                    <span>${escapeHTML(product.oum)}</span>
+                    <span class="stock-status-text">${status.label}</span>
+                </div>
+                <div class="quantity-control">
+                    <button type="button" class="qty-btn" data-quantity-action="less" data-product-id="${id}" aria-label="Decrease ${name} quantity" ${quantity <= 0 ? "disabled" : ""}>
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span class="qty-value" data-quantity-value>Quantity: ${quantity}</span>
+                    <button type="button" class="qty-btn" data-quantity-action="add" data-product-id="${id}" aria-label="Increase ${name} quantity">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div class="stock-actions">
+                    <button type="button" class="remove-btn" data-remove-product="${id}">
+                        <i class="fa-regular fa-trash-can"></i> Remove
+                    </button>
+                </div>
+            </div>
+        </article>
+    `;
+}
+
+function refreshStockEmptyState(){
+    const grid = document.getElementById("stockGrid");
+    const cards = grid.querySelectorAll(".product-card");
+    const empty = grid.querySelector(".stock-empty-state");
+
+    if(cards.length === 0 && !empty){
+        grid.innerHTML = `
+            <div class="empty-state stock-empty-state" style="grid-column:1/-1">
+                <i class="fa-solid fa-box-open"></i>
+                <h3>No products found</h3>
+                <p>Your listed products will appear here.</p>
+            </div>
+        `;
+    }else if(cards.length > 0 && empty){
+        empty.remove();
+    }
+}
+
+function updateStockCard(card, quantity){
+    const status = stockStatus(quantity);
+    card.querySelector(".stock-badge").textContent = status.badge;
+    card.querySelector(".stock-badge").style.background = status.color;
+    card.querySelector("[data-quantity-value]").textContent = `Quantity: ${Number(quantity)}`;
+    card.querySelector(".stock-status-text").textContent = status.label;
+    card.querySelector('[data-quantity-action="less"]').disabled = Number(quantity) <= 0;
+}
+
+async function changeStockQuantity(productId, action){
+    if(stockBusyProducts.has(productId)) return;
+
+    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+    if(!card) return;
+
+    const buttons = card.querySelectorAll(".qty-btn");
+    stockBusyProducts.add(productId);
+    buttons.forEach(button => button.disabled = true);
+
+    try{
+        const response = await fetch(`${STOCK_API.quantity}/${encodeURIComponent(productId)}/quantity`, {
+            method:"PATCH",
+            headers:{
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "X-CSRF-TOKEN":STOCK_API.csrf,
+                "X-Requested-With":"XMLHttpRequest"
+            },
+            body:JSON.stringify({action})
+        });
+
+        const result = await response.json();
+        if(!response.ok || !result.success){
+            throw new Error(result.message || "Unable to update product quantity.");
+        }
+
+        updateStockCard(card, result.quantity);
+        showToast(action === "add" ? "Product quantity increased." : "Product quantity decreased.");
+    }catch(error){
+        showToast(error.message || "An error occurred while updating quantity.");
+    }finally{
+        stockBusyProducts.delete(productId);
+        const currentQuantity = Number(card.querySelector("[data-quantity-value]")?.textContent.match(/\d+/)?.[0] || 0);
+        buttons.forEach(button => {
+            button.disabled = button.dataset.quantityAction === "less" && currentQuantity <= 0;
+        });
+    }
+}
+
+async function removeStockProduct(productId, button){
+    if(stockBusyProducts.has(productId)) return;
+    if(!confirm("Are you sure you want to remove this product from your stock?")) return;
+
+    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+    if(!card) return;
+
+    stockBusyProducts.add(productId);
+    if(button) button.disabled = true;
+
+    try{
+        const response = await fetch(`${STOCK_API.remove}/${encodeURIComponent(productId)}`, {
+            method:"DELETE",
+            headers:{
+                "Accept":"application/json",
+                "X-CSRF-TOKEN":STOCK_API.csrf,
+                "X-Requested-With":"XMLHttpRequest"
+            }
+        });
+
+        const result = await response.json();
+        if(!response.ok || !result.success){
+            throw new Error(result.message || "Unable to remove this product.");
+        }
+
+        card.remove();
+        refreshStockEmptyState();
+
+        const totalProductsElement = document.getElementById("totalProducts");
+        if(totalProductsElement){
+            totalProductsElement.textContent = Math.max(0, Number(totalProductsElement.textContent || 0) - 1);
+        }
+
+        showToast("Product removed successfully.");
+    }catch(error){
+        if(button) button.disabled = false;
+        showToast(error.message || "An error occurred while removing the product.");
+    }finally{
+        stockBusyProducts.delete(productId);
+    }
+}
+
+function showStockFormError(message){
+    const errorBox = document.getElementById("stockFormError");
+    errorBox.textContent = message;
+    errorBox.classList.add("show");
+}
+
+const stockProductNameInput = document.getElementById("stockProductName");
+const stockOumInput = document.getElementById("stockOum");
+
+// Product names and units are alphabetic only. Normalize product-name casing as the user types.
+function keepAlphabeticOnly(value){
+    return value.replace(/[^A-Za-z]/g, "");
+}
+
+function formatStockProductName(value){
+    const words = value.replace(/[^A-Za-z ]/g, "");
+
+    return words
+        .replace(/\s+/g, " ")
+        .replace(/\b[a-z]/g, letter => letter.toUpperCase());
+}
+
+stockProductNameInput.addEventListener("input", function(){
+    const formatted = formatStockProductName(this.value);
+    if(this.value !== formatted) this.value = formatted;
+});
+
+stockOumInput.addEventListener("input", function(){
+    const letters = keepAlphabeticOnly(this.value);
+    if(this.value !== letters) this.value = letters;
+});
+
+document.getElementById("addStockButton").addEventListener("click", () => {
+    document.getElementById("addStockForm").reset();
+    document.getElementById("stockFormError").classList.remove("show");
+    openModal("addStockModal");
+});
+
+document.getElementById("addStockForm").addEventListener("submit", async function(event){
+    event.preventDefault();
+
+    const form = this;
+    const submitButton = document.getElementById("saveStockButton");
+    const errorBox = document.getElementById("stockFormError");
+    errorBox.classList.remove("show");
+
+    // Require all product details, including the product image.
+    const requiredFields = [
+        { element: document.getElementById("stockProductName"), label: "Product Name" },
+        { element: document.getElementById("stockCategory"), label: "Category" },
+        { element: document.getElementById("stockPrice"), label: "Price" },
+        { element: document.getElementById("stockQuantity"), label: "Quantity" },
+        { element: document.getElementById("stockOum"), label: "Unit of Measurement" }
+    ];
+
+    const firstEmptyField = requiredFields.find(field => {
+        return field.element.value.trim() === "";
+    });
+
+    const imageInput = document.getElementById("stockImage");
+
+    // Normalize again immediately before submission so the submitted value is always formatted.
+    stockProductNameInput.value = formatStockProductName(stockProductNameInput.value);
+    stockOumInput.value = keepAlphabeticOnly(stockOumInput.value);
+
+    if(firstEmptyField){
+        showStockFormError("Please fill in all required fields first.");
+        firstEmptyField.element.focus();
+        return;
+    }
+
+    if(!imageInput.files || imageInput.files.length === 0){
+        showStockFormError("Please upload a product image before adding the product.");
+        imageInput.focus();
+        return;
+    }
+
+    if(!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(stockProductNameInput.value)){
+        showStockFormError("Product Name must contain letters and spaces only.");
+        stockProductNameInput.focus();
+        return;
+    }
+
+    if(!/^[A-Za-z]+$/.test(stockOumInput.value)){
+        showStockFormError("Unit of Measurement must contain alphabetic letters only. Numbers, spaces, and special symbols are not allowed.");
+        stockOumInput.focus();
+        return;
+    }
+
+    if(!form.reportValidity()) return;
+
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+    try{
+        const response = await fetch(STOCK_API.add, {
+            method:"POST",
+            headers:{
+                "Accept":"application/json",
+                "X-CSRF-TOKEN":STOCK_API.csrf,
+                "X-Requested-With":"XMLHttpRequest"
+            },
+            body:new FormData(form)
+        });
+
+        const result = await response.json();
+        if(!response.ok || !result.success){
+            const validationMessage = result.errors ? Object.values(result.errors).flat()[0] : result.message;
+            throw new Error(validationMessage || "Unable to add product.");
+        }
+
+        const empty = document.querySelector("#stockGrid .stock-empty-state");
+        if(empty) empty.remove();
+
+        document.getElementById("stockGrid").insertAdjacentHTML("afterbegin", stockCardHTML(result.product));
+
+        const totalProductsElement = document.getElementById("totalProducts");
+        if(totalProductsElement){
+            totalProductsElement.textContent = Number(totalProductsElement.textContent || 0) + 1;
+        }
+
+        document.getElementById("stockSearch").value = "";
+        document.querySelectorAll("#stockGrid .product-card").forEach(card => card.style.display = "");
+
+        closeModal("addStockModal");
+        form.reset();
+        showToast("Product added successfully.");
+    }catch(error){
+        showStockFormError(error.message || "An error occurred while adding the product.");
+    }finally{
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fa-solid fa-plus"></i> Add Product';
+    }
+});
+
+document.getElementById("stockGrid").addEventListener("click", event => {
+    const quantityButton = event.target.closest("[data-quantity-action]");
+    if(quantityButton){
+        changeStockQuantity(Number(quantityButton.dataset.productId), quantityButton.dataset.quantityAction);
+        return;
+    }
+
+    const removeButton = event.target.closest("[data-remove-product]");
+    if(removeButton){
+        removeStockProduct(Number(removeButton.dataset.removeProduct), removeButton);
+    }
+});
+
+/* =========================
+   STOCK SEARCH
+========================= */
+
+document.getElementById("stockSearch").addEventListener("input", function(){
+    const query = this.value.trim().toLowerCase();
+    const cards = Array.from(document.querySelectorAll("#stockGrid .product-card"));
+    let firstMatch = null;
+
+    cards.forEach(card => {
+        const matches = card.dataset.name.includes(query);
+        card.style.display = matches ? "" : "none";
+        if (matches && !firstMatch) firstMatch = card;
+    });
+
+    const emptyMessage = document.getElementById("stockSearchEmpty");
+    if (emptyMessage) emptyMessage.remove();
+
+    if (query && !firstMatch) {
+        const message = document.createElement("div");
+        message.id = "stockSearchEmpty";
+        message.className = "empty-state";
+        message.style.gridColumn = "1/-1";
+        message.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i><h3>No stock items found</h3><p>Try another product name.</p>';
+        document.getElementById("stockGrid").appendChild(message);
+    }
+});
 
 document
     .getElementById("transactionSearch")
@@ -3396,6 +3488,8 @@ function observeNewElements(){
         .querySelectorAll(".reveal,.stagger")
         .forEach(element=>{
 
+            if(element.closest("#myStockSection")) return;
+
             if(!element.dataset.observed){
                 observer.observe(element);
                 element.dataset.observed="true";
@@ -3448,7 +3542,6 @@ document.addEventListener("keydown",event=>{
    INITIALIZE
 ========================= */
 
-renderStocks();
 renderTransactions();
 renderRequests();
 updateStatistics();
