@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('address_3')->nullable();
             $table->string('active_address')->nullable();
             $table->string('bio')->nullable();
-            $table->longBlob('profile_picture')->nullable();
+            $table->addColumn('longBlob', 'profile_picture')->nullable();
             $table->string('real_name')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
