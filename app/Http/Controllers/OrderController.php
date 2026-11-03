@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -11,112 +10,508 @@ use App\Models\Product;
 
 class OrderController extends Controller
 {
-    // Store a customer's order request.
+    
+    // Store multiple customer order requests.
     public function storeOrder(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'product_id'    => 'required|integer|exists:products,product_id',
-            'quantity'      => 'required|integer|min:1',
-            'customer_name' => 'required|string|max:255',
-            'mobile_number' => 'required|string|max:30',
-            'address'       => 'required|string|max:1000',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer|distinct',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.cart_id' => 'nullable|integer|distinct',
+            'cart_ids' => 'nullable|array',
+            'cart_ids.*' => 'integer|distinct',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => $validator->errors()->first(),
-                'errors'  => $validator->errors(),
+                'errors' => $validator->errors(),
             ], 422);
         }
 
-        $product = DB::table('products')
-            ->where('product_id', $request->product_id)
+        $buyerId = auth()->id();
+
+        $buyer = DB::table('users')
+            ->where('id', $buyerId)
             ->first();
 
-        if (!$product) {
+        if (!$buyer) {
             return response()->json([
                 'success' => false,
-                'message' => 'Product not found.',
+                'message' => 'Customer account not found.',
             ], 404);
         }
 
-        if ($product->seller_id == auth()->id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You cannot order your own product.',
-            ], 403);
-        }
+        $customerName = trim($buyer->real_name ?? '');
+        $mobileNumber = trim($buyer->phone ?? '');
+        $customerAddress = trim($buyer->active_address ?? '');
 
-        if ($request->quantity > $product->quantity) {
+        if (
+            empty($customerName) ||
+            empty($mobileNumber) ||
+            empty($customerAddress)
+        ) {
             return response()->json([
                 'success' => false,
-                'message' => 'Requested quantity exceeds available stock.',
+                'message' => 'Please complete your name, phone number, and delivery address in your account settings before ordering.',
             ], 422);
         }
 
-        $shippingFee = session(
-            'order_shipping_fee_' . $product->product_id,
-            10
-        );
+        $items = $request->input('items', []);
+        $cartIds = $request->input('cart_ids', []);
 
-        $totalAmount = ($product->price * $request->quantity) + $shippingFee;
+        try {
+            $result = DB::transaction(function () use (
+                $items,
+                $cartIds,
+                $buyerId,
+                $customerName,
+                $mobileNumber,
+                $customerAddress
+            ) {
+                $createdOrders = [];
 
-        DB::table('order_requests')->insert([
-            'order_id'      => null,
-            'buyer_id'      => auth()->id(),
-            'seller_id'     => $product->seller_id,
-            'product_id'    => $product->product_id,
-            'product_name'  => $product->product_name,
-            'quantity'      => $request->quantity,
-            'oum'           => $product->oum,
-            'customer_name' => $request->customer_name,
-            'mobile_number' => $request->mobile_number,
-            'address'       => $request->address,
-            'total_amount'  => $totalAmount,
-            'status'        => 'pending',
-            'created_at'    => now(),
-            'updated_at'    => now(),
-        ]);
+                foreach ($items as $item) {
+                    $product = Product::where(
+                        'product_id',
+                        $item['product_id']
+                    )->lockForUpdate()->first();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Your order request has been submitted.',
-        ]);
+                    if (!$product) {
+                        throw new \Exception('One of the selected products no longer exists.');
+                    }
+
+                    if ((int) $product->seller_id === (int) $buyerId) {
+                        throw new \Exception(
+                            'You cannot order your own product: ' .
+                            $product->product_name
+                        );
+                    }
+
+                    $quantity = (int) $item['quantity'];
+
+                    if ($product->quantity <= 0) {
+                        throw new \Exception(
+                            $product->product_name . ' is out of stock.'
+                        );
+                    }
+
+                    if ($quantity > $product->quantity) {
+                        throw new \Exception(
+                            'Requested quantity exceeds available stock for ' .
+                            $product->product_name .
+                            '. Available stock: ' . $product->quantity
+                        );
+                    }
+
+                    // Verify that a supplied cart item belongs to this buyer.
+                    if (!empty($item['cart_id'])) {
+                        $cartItem = DB::table('carts')
+                            ->where('cart_id', $item['cart_id'])
+                            ->where('buyer_id', $buyerId)
+                            ->where('product_id', $product->product_id)
+                            ->first();
+
+                        if (!$cartItem) {
+                            throw new \Exception(
+                                'One of your selected cart items is no longer available.'
+                            );
+                        }
+                    }
+
+                    $shippingFee = (float) session(
+                        'order_shipping_fee_' . $product->product_id,
+                        10
+                    );
+
+                    $totalAmount =
+                        ((float) $product->price * $quantity) + $shippingFee;
+
+                    $requestId = DB::table('order_requests')->insertGetId([
+                        'order_id' => null,
+                        'buyer_id' => $buyerId,
+                        'seller_id' => $product->seller_id,
+                        'product_id' => $product->product_id,
+                        'product_name' => $product->product_name,
+                        'quantity' => $quantity,
+                        'oum' => $product->oum,
+                        'customer_name' => $customerName,
+                        'mobile_number' => $mobileNumber,
+                        'address' => $customerAddress,
+                        'total_amount' => $totalAmount,
+                        'status' => 'pending',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ], 'request_id');
+
+                    DB::table('order_requests')
+                        ->where('request_id', $requestId)
+                        ->update([
+                            'order_id' => $requestId,
+                        ]);
+
+                    $createdOrders[] = $requestId;
+                }
+
+                // Remove only the cart items included in this checkout.
+                if (!empty($cartIds)) {
+                    $validCartIds = DB::table('carts')
+                        ->where('buyer_id', $buyerId)
+                        ->whereIn('cart_id', $cartIds)
+                        ->pluck('cart_id')
+                        ->toArray();
+
+                    if (count($validCartIds) !== count(array_unique($cartIds))) {
+                        throw new \Exception(
+                            'One or more selected cart items could not be verified.'
+                        );
+                    }
+
+                    DB::table('carts')
+                        ->where('buyer_id', $buyerId)
+                        ->whereIn('cart_id', $cartIds)
+                        ->delete();
+                }
+
+                return $createdOrders;
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => count($result) . ' order(s) successfully submitted.',
+                'orders' => $result,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
 
-    // Display the order summary page.
+    // Display the order summary page for multiple products.
     public function orderSummary(Request $request)
     {
-        $request->validate([
-            'product_id' => 'required|integer|exists:products,product_id',
-        ]);
+        $buyerId = auth()->id();
 
-        $product = Product::where('product_id', $request->product_id)->first();
+        $buyer = DB::table('users')
+            ->where('id', $buyerId)
+            ->first();
 
-        if (!$product) {
-            return back()->with('error', 'Product not found.');
+        if (!$buyer) {
+            return back()->with('error', 'Customer account not found.');
         }
 
-        if ($product->seller_id == auth()->id()) {
-            return back()->with('error', 'You cannot order your own product.');
+        $customerName = $buyer->real_name ?? '';
+        $mobileNumber = $buyer->phone ?? '';
+        $deliveryAddress = $buyer->active_address ?? '';
+
+        $items = collect();
+
+        // Cart checkout.
+        if ($request->filled('cart_ids')) {
+            $validated = $request->validate([
+                'cart_ids' => 'required|array|min:1',
+                'cart_ids.*' => 'required|integer|distinct',
+            ]);
+
+            $cartItems = DB::table('carts')
+                ->join(
+                    'products',
+                    'carts.product_id',
+                    '=',
+                    'products.product_id'
+                )
+                ->where('carts.buyer_id', $buyerId)
+                ->whereIn('carts.cart_id', $validated['cart_ids'])
+                ->select(
+                    'carts.cart_id',
+                    'carts.seller_id',
+                    'carts.product_id',
+                    'carts.product_name',
+                    'carts.oum',
+                    'carts.seller_name',
+                    'products.price',
+                    'products.quantity',
+                    'products.image',
+                    'products.status'
+                )
+                ->get();
+
+            if ($cartItems->count() !== count($validated['cart_ids'])) {
+                return back()->with(
+                    'error',
+                    'One or more selected cart products are no longer available.'
+                );
+            }
+
+            foreach ($cartItems as $item) {
+                if ((int) $item->seller_id === (int) $buyerId) {
+                    return back()->with(
+                        'error',
+                        'You cannot order your own product.'
+                    );
+                }
+
+                if ($item->quantity <= 0) {
+                    return back()->with(
+                        'error',
+                        $item->product_name . ' is out of stock.'
+                    );
+                }
+
+                $shippingFee = session(
+                    'order_shipping_fee_' . $item->product_id
+                );
+
+                if ($shippingFee === null) {
+                    $shippingFee = random_int(10, 30);
+
+                    session([
+                        'order_shipping_fee_' . $item->product_id => $shippingFee
+                    ]);
+                }
+
+                $item->shipping_fee = (float) $shippingFee;
+                $item->order_quantity = 1;
+
+                $items->push($item);
+            }
         }
 
-        if ($product->quantity <= 0) {
-            return back()->with('error', 'This product is currently out of stock.');
+        // Direct Buy Now checkout remains supported.
+        elseif ($request->filled('product_id')) {
+            $validated = $request->validate([
+                'product_id' => 'required|integer|exists:products,product_id',
+            ]);
+
+            $product = Product::where(
+                'product_id',
+                $validated['product_id']
+            )->first();
+
+            if (!$product) {
+                return back()->with('error', 'Product not found.');
+            }
+
+            if ((int) $product->seller_id === (int) $buyerId) {
+                return back()->with(
+                    'error',
+                    'You cannot order your own product.'
+                );
+            }
+
+            if ($product->quantity <= 0) {
+                return back()->with(
+                    'error',
+                    'This product is currently out of stock.'
+                );
+            }
+
+            $shippingFee = session(
+                'order_shipping_fee_' . $product->product_id
+            );
+
+            if ($shippingFee === null) {
+                $shippingFee = random_int(10, 30);
+
+                session([
+                    'order_shipping_fee_' . $product->product_id => $shippingFee
+                ]);
+            }
+
+            $product->cart_id = null;
+            $product->seller_name = DB::table('users')
+                ->where('id', $product->seller_id)
+                ->value('real_name');
+
+            $product->shipping_fee = (float) $shippingFee;
+            $product->order_quantity = 1;
+
+            $items->push($product);
         }
 
-        $shippingFee = session(
-            'order_shipping_fee_' . $product->product_id,
-            rand(10, 30)
-        );
+        else {
+            return back()->with(
+                'error',
+                'Please select at least one product.'
+            );
+        }
 
-        session([
-            'order_shipping_fee_' . $product->product_id => $shippingFee
-        ]);
+        return view('order.ordersummary', compact(
+            'items',
+            'customerName',
+            'mobileNumber',
+            'deliveryAddress'
+        ));
+    }
 
-        return view('order.ordersummary', compact('product', 'shippingFee'));
+
+    // DISPLAY MY PURCHASES AND SHOPPING CART PAGE.
+    public function cart()
+    {
+        $buyerId = auth()->id();
+
+        /*
+        |--------------------------------------------------------------------------
+        | PENDING ORDER REQUESTS
+        |--------------------------------------------------------------------------
+        | These are orders submitted by the buyer but not yet accepted
+        | by the seller.
+        */
+
+        $pendingPurchases = DB::table('order_requests')
+            ->leftJoin(
+                'users as sellers',
+                'order_requests.seller_id',
+                '=',
+                'sellers.id'
+            )
+            ->where('order_requests.buyer_id', $buyerId)
+            ->where('order_requests.status', 'pending')
+            ->select(
+                'order_requests.request_id',
+                'order_requests.order_id',
+                'order_requests.seller_id',
+                'order_requests.product_name',
+                'order_requests.quantity',
+                'order_requests.oum',
+                'order_requests.total_amount',
+                'order_requests.status',
+                'order_requests.created_at',
+                'sellers.real_name as seller_name'
+            )
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ACCEPTED ORDERS / TRANSACTIONS
+        |--------------------------------------------------------------------------
+        | These include Shipping and Completed transactions.
+        */
+
+        $completedPurchases = DB::table('transactions')
+            ->leftJoin(
+                'users as sellers',
+                'transactions.seller_id',
+                '=',
+                'sellers.id'
+            )
+            ->where('transactions.buyer_id', $buyerId)
+            ->select(
+                'transactions.order_id',
+                'transactions.seller_id',
+                'transactions.product_name',
+                'transactions.quantity',
+                'transactions.oum',
+                'transactions.total_amount',
+                'transactions.status',
+                'transactions.created_at',
+                'sellers.real_name as seller_name'
+            )
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMBINE BOTH PURCHASE SOURCES
+        |--------------------------------------------------------------------------
+        */
+
+        $purchases = $pendingPurchases
+            ->concat($completedPurchases)
+            ->sortByDesc(function ($purchase) {
+                return strtotime($purchase->created_at);
+            })
+            ->values()
+            ->map(function ($purchase) {
+
+                return [
+                    'id' => (string) $purchase->order_id,
+
+                    // Used only for cancelling pending purchases.
+                    'request_id' => $purchase->request_id ?? null,
+
+                    'seller' => $purchase->seller_name
+                        ?: 'Unknown Seller',
+
+                    'seller_id' => $purchase->seller_id,
+
+                    'amount' => (float) $purchase->total_amount,
+
+                    'status' => $purchase->status,
+
+                    'date' => $purchase->created_at
+                        ? \Carbon\Carbon::parse($purchase->created_at)
+                            ->timezone('Asia/Manila')
+                            ->format('F d, Y')
+                        : '—',
+
+                    'products' => [
+                        [
+                            'name' => $purchase->product_name,
+                            'quantity' => (int) $purchase->quantity,
+                            'unit' => $purchase->oum,
+                        ]
+                    ],
+                ];
+            })
+            ->all();
+
+
+        return view('order.cart', compact('purchases'));
+    }
+
+
+    // CANCEL: Delete a buyer's own pending purchase request.
+    public function cancelPurchase($requestId)
+    {
+        try {
+            $deleted = DB::transaction(function () use ($requestId) {
+
+                $orderRequest = DB::table('order_requests')
+                    ->where('request_id', $requestId)
+                    ->where('buyer_id', auth()->id())
+                    ->where('status', 'pending')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$orderRequest) {
+                    throw new \Exception(
+                        'This order cannot be cancelled. It may already have been processed or is no longer available.'
+                    );
+                }
+
+                return DB::table('order_requests')
+                    ->where('request_id', $requestId)
+                    ->where('buyer_id', auth()->id())
+                    ->where('status', 'pending')
+                    ->delete();
+            });
+
+            if (!$deleted) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to cancel this order.'
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Your order has been cancelled successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 
 
@@ -150,11 +545,18 @@ class OrderController extends Controller
 
 
     // Display the seller's orders page, pending order requests,
-    // and transactions.
+    // transactions, and authenticated user's information.
     public function orders()
     {
-        // Automatically complete orders whose completion time has passed.
         $this->updateCompletedOrders();
+
+        $buyer = DB::table('users')
+            ->where('id', auth()->id())
+            ->first();
+
+        $customerName = trim($buyer->real_name ?? '');
+        $mobileNumber = trim($buyer->phone ?? '');
+        $deliveryAddress = trim($buyer->active_address ?? '');
 
         $totalProducts = Product::where('seller_id', auth()->id())->count();
 
@@ -198,7 +600,10 @@ class OrderController extends Controller
             'totalProducts',
             'products',
             'orderRequests',
-            'transactions'
+            'transactions',
+            'customerName',
+            'mobileNumber',
+            'deliveryAddress'
         ));
     }
 
@@ -210,7 +615,6 @@ class OrderController extends Controller
         try {
             $result = DB::transaction(function () use ($requestId) {
 
-                // Lock the pending request.
                 $orderRequest = DB::table('order_requests')
                     ->where('request_id', $requestId)
                     ->where('seller_id', auth()->id())
@@ -224,7 +628,6 @@ class OrderController extends Controller
                     );
                 }
 
-                // Lock the product before checking its stock.
                 $product = Product::where('product_id', $orderRequest->product_id)
                     ->where('seller_id', auth()->id())
                     ->lockForUpdate()
@@ -236,14 +639,12 @@ class OrderController extends Controller
                     );
                 }
 
-                // Prevent accepting orders when stock is zero.
                 if ($product->quantity <= 0) {
                     throw new \Exception(
                         'This product is currently unavailable. Please add more stock before accepting another order.'
                     );
                 }
 
-                // Check whether sufficient stock is available.
                 if ($orderRequest->quantity > $product->quantity) {
                     throw new \Exception(
                         'Insufficient stock. Available stock: ' .
@@ -253,27 +654,24 @@ class OrderController extends Controller
                     );
                 }
 
-                // Deduct the requested quantity.
                 $product->quantity -= $orderRequest->quantity;
 
-                // Update product availability.
                 $product->status = $this->getProductStatus(
                     $product->quantity
                 );
 
                 $product->save();
 
-                // Generate a random delivery duration between 1.00 and 3.00 days.
                 $deliveryDays = random_int(100, 300) / 100;
 
-                // Calculate completion time using Philippine Time (UTC+8).
                 $completionTime = now('Asia/Manila')->addSeconds(
                     (int) round($deliveryDays * 86400)
                 );
 
-                // Insert the accepted order as Shipping.
+                $orderId = $orderRequest->order_id;
+
                 DB::table('transactions')->insert([
-                    'order_id'        => $orderRequest->order_id,
+                    'order_id'        => $orderId,
                     'buyer_id'        => $orderRequest->buyer_id,
                     'seller_id'       => $orderRequest->seller_id,
                     'product_id'      => $orderRequest->product_id,
@@ -290,7 +688,6 @@ class OrderController extends Controller
                     'updated_at'      => now(),
                 ]);
 
-                // Delete the request after successful acceptance.
                 DB::table('order_requests')
                     ->where('request_id', $requestId)
                     ->where('seller_id', auth()->id())
@@ -468,7 +865,6 @@ class OrderController extends Controller
 
         $productName = Str::title(trim($request->product_name));
 
-        // Prevent duplicate product names for the same seller.
         $existingProduct = Product::where('seller_id', auth()->id())
             ->whereRaw('LOWER(product_name) = ?', [strtolower($productName)])
             ->exists();
@@ -486,7 +882,6 @@ class OrderController extends Controller
                 ->withInput();
         }
 
-        // Store the uploaded image.
         $imageName = time() . '_' . uniqid() . '.' .
             $request->file('image')->getClientOriginalExtension();
 
@@ -495,7 +890,6 @@ class OrderController extends Controller
             $imageName
         );
 
-        // Insert the product.
         $productId = DB::table('products')->insertGetId([
             'seller_id'    => auth()->id(),
             'product_name' => $productName,

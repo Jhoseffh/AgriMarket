@@ -1968,7 +1968,7 @@ footer{
             <div class="customer-content">
                 <div class="customer-label">Address</div>
                 <div class="customer-value" id="customerAddress">
-                    San Isidro, Nueva Ecija
+                    {{ $deliveryAddress ?: 'Not provided' }}
                 </div>
             </div>
         </div>
@@ -1979,9 +1979,9 @@ footer{
             </div>
 
             <div class="customer-content">
-                <div class="customer-label">Real Name</div>
+                <div class="customer-label">Name</div>
                 <div class="customer-value" id="customerName">
-                    Juan Dela Cruz
+                    {{ $customerName ?: 'Not provided' }}
                 </div>
             </div>
         </div>
@@ -1994,7 +1994,7 @@ footer{
             <div class="customer-content">
                 <div class="customer-label">Contact Number</div>
                 <div class="customer-value" id="customerContact">
-                    0917 123 4567
+                    {{ $mobileNumber ?: 'Not provided' }}
                 </div>
             </div>
         </div>
@@ -3010,7 +3010,7 @@ async function declineRequest(id){
                     "X-Requested-With":"XMLHttpRequest"
                 }
             }
-        );
+        );  
 
         const result = await response.json();
 

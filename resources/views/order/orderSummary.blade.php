@@ -359,107 +359,55 @@ main::after {
 
 /* LARGE CIRCLE FLOATING ANIMATION */
 @keyframes bodyCircleLeft {
-    0%,100% {
-        transform:translate(0,0) scale(1);
-    }
-    50% {
-        transform:translate(28px,20px) scale(1.08);
-    }
+    0%,100% { transform:translate(0,0) scale(1); }
+    50% { transform:translate(28px,20px) scale(1.08); }
 }
 
 @keyframes bodyCircleRight {
-    0%,100% {
-        transform:translate(0,0) scale(1);
-    }
-    50% {
-        transform:translate(-28px,25px) scale(1.09);
-    }
+    0%,100% { transform:translate(0,0) scale(1); }
+    50% { transform:translate(-28px,25px) scale(1.09); }
 }
 
 /* MAIN CIRCLE PULSE */
 @keyframes bodyPulse {
-    0%,100% {
-        opacity:.78;
-    }
-    50% {
-        opacity:1;
-    }
+    0%,100% { opacity:.78; }
+    50% { opacity:1; }
 }
 
 /* SIDE CIRCLE FLOATING */
 @keyframes floatCircleLeft {
-    0%,100% {
-        transform:translate(0,0) scale(1);
-    }
-    25% {
-        transform:translate(15px,-18px) scale(1.04);
-    }
-    50% {
-        transform:translate(27px,8px) scale(1.09);
-    }
-    75% {
-        transform:translate(10px,22px) scale(1.03);
-    }
+    0%,100% { transform:translate(0,0) scale(1); }
+    25% { transform:translate(15px,-18px) scale(1.04); }
+    50% { transform:translate(27px,8px) scale(1.09); }
+    75% { transform:translate(10px,22px) scale(1.03); }
 }
 
 @keyframes floatCircleRight {
-    0%,100% {
-        transform:translate(0,0) scale(1);
-    }
-    25% {
-        transform:translate(-15px,-20px) scale(1.04);
-    }
-    50% {
-        transform:translate(-30px,10px) scale(1.09);
-    }
-    75% {
-        transform:translate(-12px,23px) scale(1.03);
-    }
+    0%,100% { transform:translate(0,0) scale(1); }
+    25% { transform:translate(-15px,-20px) scale(1.04); }
+    50% { transform:translate(-30px,10px) scale(1.09); }
+    75% { transform:translate(-12px,23px) scale(1.03); }
 }
 
 /* SMALL CIRCLE ANIMATIONS */
 @keyframes smallCircleLeft {
-    0%,100% {
-        transform:translate(0,0) scale(1);
-        opacity:.7;
-    }
-    50% {
-        transform:translate(18px,14px) scale(1.18);
-        opacity:1;
-    }
+    0%,100% { transform:translate(0,0) scale(1); opacity:.7; }
+    50% { transform:translate(18px,14px) scale(1.18); opacity:1; }
 }
 
 @keyframes smallCircleLeft2 {
-    0%,100% {
-        transform:translate(0,0) scale(1);
-        opacity:.55;
-    }
-    50% {
-        transform:translate(-8px,-14px) scale(1.16);
-        opacity:.9;
-    }
+    0%,100% { transform:translate(0,0) scale(1); opacity:.55; }
+    50% { transform:translate(-8px,-14px) scale(1.16); opacity:.9; }
 }
 
 @keyframes smallCircleRight {
-    0%,100% {
-        transform:translate(0,0) scale(1);
-        opacity:.7;
-    }
-    50% {
-        transform:translate(-18px,15px) scale(1.18);
-        opacity:1;
-    }
+    0%,100% { transform:translate(0,0) scale(1); opacity:.7; }
+    50% { transform:translate(-18px,15px) scale(1.18); opacity:1; }
 }
 
 @keyframes smallCircleRight2 {
-    0%,100% {
-        transform:translate(0,0) scale(1);
-        opacity:.55;
-    }
-    50% {
-        transform:translate(8px,-14px) scale(1.16);
-        opacity:.9;
-    }
+    0%,100% { transform:translate(0,0) scale(1); opacity:.55; }
+    50% { transform:translate(8px,-14px) scale(1.16); opacity:.9; }
 }
 
 .order-page {
@@ -532,25 +480,6 @@ main::after {
 }
 
 .delivery-label i { font-size:.72rem; }
-
-.change-address {
-    display:inline-flex;
-    align-items:center;
-    gap:5px;
-    border:0;
-    background:transparent;
-    color:var(--accent-terracotta);
-    cursor:pointer;
-    font-size:.65rem;
-    font-weight:800;
-    white-space:nowrap;
-    transition:.25s ease;
-}
-
-.change-address:hover {
-    color:var(--accent-terracotta-hover);
-    transform:translateX(2px);
-}
 
 .customer-line {
     margin-top:6px;
@@ -1285,7 +1214,6 @@ footer {
 
     .delivery-top { gap:8px; }
     .delivery-label { font-size:.6rem; }
-    .change-address { font-size:.59rem; }
     .customer-line { font-size:.72rem; }
     .customer-address { font-size:.62rem; }
 
@@ -1433,35 +1361,29 @@ footer {
 
 <body>
 
-<!-- AMBIENT BACKGROUND -->
 <div class="ambient-bg">
     <div class="ambient-shape shape-a"></div>
     <div class="ambient-shape shape-b"></div>
 </div>
 
-<!-- TOP BAR -->
 <nav class="navbar" id="navbar">
     <a href="{{ route('shop') }}" class="brand">
         <i class="fa-solid fa-leaf"></i>
         <span>agrimarket</span>
     </a>
 
-    <button  type="button" class="back-button" id="backButton" onclick="window.history.back()">
+    <button type="button" class="back-button" id="backButton">
         <i class="fa-solid fa-arrow-left"></i>
         <span>Back</span>
     </button>
 </nav>
 
-<!-- MAIN -->
 <main>
-
-    <!-- BODY SIDE DECORATIONS -->
     <div class="body-side-decoration left"></div>
     <div class="body-side-decoration right"></div>
 
     <section class="order-page reveal" id="orderPage">
 
-        <!-- PAGE INTRO -->
         <div class="page-intro">
             <span class="eyebrow">Final Step</span>
             <h1>Order Summary</h1>
@@ -1475,106 +1397,97 @@ footer {
                     <i class="fa-solid fa-location-dot"></i>
                     <span>Delivery Information</span>
                 </div>
-
-                <button type="button" class="change-address" onclick="showToast('Address changing will be available soon.')">
-                    <i class="fa-solid fa-pen"></i>
-                    Change Address
-                </button>
             </div>
 
             <div class="customer-line">
-                <strong>Jhoseffh Matthew D. Soriano</strong>
-                <strong>(+63) 962 907 1668</strong>
+                <strong>{{ $customerName }}</strong>
+                <strong>{{ $mobileNumber }}</strong>
             </div>
 
-            <div class="customer-address" title="San Nicolas, Olongapo City, Zambales, Philippines">
+            <div class="customer-address" title="{{ $deliveryAddress }}">
                 <i class="fa-solid fa-location-dot"></i>
-                <span class="address-text">San Nicolas, Olongapo City, Zambales, Philippines</span>
+                <span class="address-text">{{ $deliveryAddress }}</span>
             </div>
         </section>
 
-        <!-- SEPARATOR -->
         <div class="section-separator">
             <span>Products to Order</span>
         </div>
 
-        <!-- PRODUCTS -->
+        <!-- MULTIPLE PRODUCTS -->
         <section class="products-section" id="productsSection">
 
-            <div class="seller-card">
+            @foreach($items as $index => $item)
 
-                <div class="seller-header">
-                    <div class="seller-name">
-                        <i class="fa-solid fa-store"></i>
-                        <span>Seller #{{ $product->seller_id }}</span>
+                <div class="seller-card">
+
+                    <div class="seller-header">
+                        <div class="seller-name">
+                            <i class="fa-solid fa-store"></i>
+                            <span>
+                                {{ $item->seller_name ?? ('Seller #' . $item->seller_id) }}
+                            </span>
+                        </div>
+
+                        <span class="seller-label">
+                            Available Stock: {{ number_format($item->quantity) }}
+                        </span>
                     </div>
 
-                    <span class="seller-label">
-                        Available Stock: {{ number_format($product->quantity) }}
-                    </span>
+                    <div
+                        class="product-item"
+                        data-product-id="{{ $item->product_id }}"
+                        data-cart-id="{{ $item->cart_id ?? '' }}"
+                        data-price="{{ $item->price }}"
+                        data-stock="{{ $item->quantity }}"
+                        data-shipping="{{ $item->shipping_fee }}"
+                    >
+
+                        <div class="product-image">
+                            <img
+                                src="{{ asset('image/product/' . $item->image) }}"
+                                alt="{{ $item->product_name }}"
+                                onerror="this.style.display='none';"
+                            >
+                        </div>
+
+                        <div class="product-details">
+                            <div class="product-name">
+                                {{ $item->product_name }}
+                            </div>
+
+                            <div class="product-unit">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                                {{ $item->oum }}
+                            </div>
+
+                            <div class="product-price">
+                                ₱{{ number_format((float) $item->price, 2) }}
+                            </div>
+                        </div>
+
+                        <div class="quantity-control">
+                            <button
+                                type="button"
+                                class="quantity-btn decrease"
+                                aria-label="Decrease quantity"
+                                onclick="changeQuantity({{ $index }}, -1)"
+                            >−</button>
+
+                            <span class="quantity-value" aria-live="polite">1</span>
+
+                            <button
+                                type="button"
+                                class="quantity-btn increase"
+                                aria-label="Increase quantity"
+                                onclick="changeQuantity({{ $index }}, 1)"
+                            >+</button>
+                        </div>
+
+                    </div>
                 </div>
 
-                <div
-                    class="product-item"
-                    id="productItem"
-                    data-product-id="{{ $product->product_id }}"
-                    data-price="{{ $product->price }}"
-                    data-stock="{{ $product->quantity }}"
-                >
-
-                    <div class="product-image">
-                        <img
-                            src="{{ asset('image/product/' . $product->image) }}"
-                            alt="{{ $product->product_name }}"
-                            onerror="this.style.display='none';"
-                        >
-                    </div>
-
-                    <div class="product-details">
-
-                        <div class="product-name">
-                            {{ $product->product_name }}
-                        </div>
-
-                        <div class="product-unit">
-                            <i class="fa-solid fa-scale-balanced"></i>
-                            {{ $product->oum }}
-                        </div>
-
-                        <div class="product-price">
-                            ₱{{ number_format((float) $product->price, 2) }}
-                        </div>
-
-                    </div>
-
-                    <div class="quantity-control">
-
-                        <button
-                            type="button"
-                            class="quantity-btn"
-                            id="decreaseQuantity"
-                            aria-label="Decrease quantity"
-                            onclick="changeQuantity(-1)"
-                        >−</button>
-
-                        <span
-                            class="quantity-value"
-                            id="quantityValue"
-                            aria-live="polite"
-                        >1</span>
-
-                        <button
-                            type="button"
-                            class="quantity-btn"
-                            id="increaseQuantity"
-                            aria-label="Increase quantity"
-                            onclick="changeQuantity(1)"
-                        >+</button>
-
-                    </div>
-
-                </div>
-            </div>
+            @endforeach
 
         </section>
 
@@ -1590,30 +1503,24 @@ footer {
 
                 <div class="summary-row subtotal">
                     <strong>Product Subtotal</strong>
-                    <strong class="price" id="productSubtotal">
-                        ₱{{ number_format((float) $product->price, 2) }}
-                    </strong>
+                    <strong class="price" id="productSubtotal">₱0.00</strong>
                 </div>
 
                 <div class="summary-row">
-                    <span>Quantity</span>
-                    <span class="price" id="summaryQuantity">1</span>
+                    <span>Total Quantity</span>
+                    <span class="price" id="summaryQuantity">0</span>
                 </div>
 
                 <div class="summary-row shipping-subtotal">
-                    <strong>Shipping Fee</strong>
-                    <strong class="price" id="shippingFee">
-                        ₱{{ number_format($shippingFee, 2) }}
-                    </strong>
+                    <strong>Shipping Fees</strong>
+                    <strong class="price" id="shippingFee">₱0.00</strong>
                 </div>
 
                 <div class="summary-divider"></div>
 
                 <div class="summary-row total">
                     <strong>Total</strong>
-                    <strong class="price" id="summaryTotal">
-                        ₱{{ number_format((float) $product->price + $shippingFee, 2) }}
-                    </strong>
+                    <strong class="price" id="summaryTotal">₱0.00</strong>
                 </div>
 
             </div>
@@ -1648,20 +1555,20 @@ footer {
 
         <!-- FINAL PAYMENT -->
         <section class="final-payment" id="finalPayment">
+
             <div class="final-payment-top">
                 <div class="final-label">
-                    Total <strong id="finalItemCount">(1 item)</strong>
+                    Total <strong id="finalItemCount">(0 items)</strong>
                 </div>
 
-                <div class="final-total" id="finalTotal">
-                    ₱{{ number_format((float) $product->price + $shippingFee, 2) }}
-                </div>
+                <div class="final-total" id="finalTotal">₱0.00</div>
             </div>
 
             <button type="button" class="pay-button" id="payButton">
                 Buy Now
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
+
         </section>
     </section>
 </main>
@@ -1670,9 +1577,8 @@ footer {
 <footer>
     <div class="footer-grid">
 
-        <!-- BRAND -->
         <div class="footer-brand">
-            <a href="#" class="brand" style="color:#fff">
+            <a href="{{ route('shop') }}" class="brand" style="color:#fff">
                 <i class="fa-solid fa-leaf"></i>
                 <span>agrimarket</span>
             </a>
@@ -1680,7 +1586,6 @@ footer {
             <p>A modern agricultural marketplace connecting buyers and sellers of farm products, supplies and services.</p>
         </div>
 
-        <!-- AGRIMARKET -->
         <div class="footer-links">
             <h4>AgriMarket</h4>
             <ul>
@@ -1690,7 +1595,6 @@ footer {
             </ul>
         </div>
 
-        <!-- LEGAL -->
         <div class="footer-links">
             <h4>Legal</h4>
             <ul>
@@ -1699,7 +1603,6 @@ footer {
             </ul>
         </div>
 
-        <!-- MARKETPLACE -->
         <div class="footer-links">
             <h4>Marketplace</h4>
             <ul>
@@ -1708,6 +1611,7 @@ footer {
                 <li><a href="#">Groceries</a></li>
             </ul>
         </div>
+
     </div>
 
     <div class="copyright">© 2026 AgriMarket. All rights reserved.</div>
@@ -1727,8 +1631,13 @@ footer {
         </div>
 
         <div class="modal-actions">
-            <button type="button" class="modal-btn cancel" id="continueOrderingButton">Continue Ordering</button>
-            <button type="button" class="modal-btn danger" id="leaveButton">Leave</button>
+            <button type="button" class="modal-btn cancel" id="continueOrderingButton">
+                Continue Ordering
+            </button>
+
+            <button type="button" class="modal-btn danger" id="leaveButton">
+                Leave
+            </button>
         </div>
     </div>
 </div>
@@ -1747,8 +1656,13 @@ footer {
         </div>
 
         <div class="modal-actions">
-            <button type="button" class="modal-btn cancel" id="cancelPaymentButton">Cancel</button>
-            <button type="button" class="modal-btn primary" id="continuePaymentButton">Continue</button>
+            <button type="button" class="modal-btn cancel" id="cancelPaymentButton">
+                Cancel
+            </button>
+
+            <button type="button" class="modal-btn primary" id="continuePaymentButton">
+                Continue
+            </button>
         </div>
     </div>
 </div>
@@ -1758,20 +1672,22 @@ footer {
 
 <script>
 /* =========================================
-   DATABASE PRODUCT INFORMATION
+   MULTIPLE PRODUCT INFORMATION
 ========================================= */
 
-const productElement = document.getElementById("productItem");
+const productElements = document.querySelectorAll(".product-item");
 
-const orderProduct = {
-    id: Number(productElement.dataset.productId),
-    price: Number(productElement.dataset.price),
-    stock: Number(productElement.dataset.stock),
+const orderItems = Array.from(productElements).map(element => ({
+    element: element,
+    id: Number(element.dataset.productId),
+    cartId: element.dataset.cartId
+        ? Number(element.dataset.cartId)
+        : null,
+    price: Number(element.dataset.price),
+    stock: Number(element.dataset.stock),
+    shipping: Number(element.dataset.shipping),
     quantity: 1
-};
-
-/* SHIPPING FEE FROM LARAVEL */
-const shippingFee = Number(@json($shippingFee));
+}));
 
 let codSelected = true;
 let orderSubmitting = false;
@@ -1796,17 +1712,25 @@ function formatPrice(price) {
 
 function calculateOrder() {
 
-    const productSubtotal =
-        orderProduct.price * orderProduct.quantity;
+    let productSubtotal = 0;
+    let totalQuantity = 0;
+    let totalShipping = 0;
 
-    const total =
-        productSubtotal + shippingFee;
+    orderItems.forEach(item => {
+
+        productSubtotal += item.price * item.quantity;
+
+        totalQuantity += item.quantity;
+
+        totalShipping += item.shipping;
+
+    });
 
     return {
         productSubtotal,
-        totalQuantity: orderProduct.quantity,
-        shippingFee,
-        total
+        totalQuantity,
+        shippingFee: totalShipping,
+        total: productSubtotal + totalShipping
     };
 }
 
@@ -1849,50 +1773,58 @@ function updateOrderSummary() {
 
 function updateQuantityButtons() {
 
-    const decreaseButton =
-        document.getElementById("decreaseQuantity");
+    orderItems.forEach(item => {
 
-    const increaseButton =
-        document.getElementById("increaseQuantity");
+        const decreaseButton =
+            item.element.querySelector(".decrease");
 
-    decreaseButton.disabled =
-        orderProduct.quantity <= 1;
+        const increaseButton =
+            item.element.querySelector(".increase");
 
-    increaseButton.disabled =
-        orderProduct.quantity >= orderProduct.stock;
+        const quantityValue =
+            item.element.querySelector(".quantity-value");
 
+        quantityValue.textContent = item.quantity;
+
+        decreaseButton.disabled =
+            item.quantity <= 1 || orderPlaced || orderSubmitting;
+
+        increaseButton.disabled =
+            item.quantity >= item.stock || orderPlaced || orderSubmitting;
+
+    });
 }
 
 
 /* =========================================
-   CHANGE QUANTITY
+   CHANGE INDIVIDUAL PRODUCT QUANTITY
 ========================================= */
 
-function changeQuantity(amount) {
+function changeQuantity(index, amount) {
 
     if (orderPlaced || orderSubmitting) {
         return;
     }
 
-    const newQuantity =
-        orderProduct.quantity + amount;
+    const item = orderItems[index];
+
+    if (!item) {
+        return;
+    }
+
+    const newQuantity = item.quantity + amount;
 
     if (newQuantity < 1) {
         showToast("Quantity cannot be less than 1.");
         return;
     }
 
-    if (newQuantity > orderProduct.stock) {
-        showToast(
-            `Only ${orderProduct.stock} available in stock.`
-        );
+    if (newQuantity > item.stock) {
+        showToast(`Only ${item.stock} available in stock.`);
         return;
     }
 
-    orderProduct.quantity = newQuantity;
-
-    document.getElementById("quantityValue").textContent =
-        orderProduct.quantity;
+    item.quantity = newQuantity;
 
     updateOrderSummary();
 }
@@ -1914,14 +1846,19 @@ function toggleCOD() {
 
     radio.classList.toggle("selected", codSelected);
 
-    radio.setAttribute("aria-pressed", codSelected);
+    radio.setAttribute("aria-pressed", String(codSelected));
+
+    radio.setAttribute(
+        "aria-label",
+        codSelected
+            ? "Cash on Delivery selected"
+            : "Cash on Delivery not selected"
+    );
 
     if (codSelected) {
         showToast("Cash on Delivery selected.");
     } else {
-        showToast(
-            "Please select Cash on Delivery before continuing."
-        );
+        showToast("Please select Cash on Delivery before continuing.");
     }
 }
 
@@ -1937,6 +1874,7 @@ document.getElementById("backButton").addEventListener("click", () => {
     }
 
     openModal("leaveModal");
+
 });
 
 
@@ -1948,21 +1886,22 @@ document.getElementById("continueOrderingButton")
     .addEventListener("click", () => {
 
         closeModal("leaveModal");
+
     });
 
 
 /* =========================================
-   LEAVE
+   LEAVE PAGE
 ========================================= */
 
 document.getElementById("leaveButton").addEventListener("click", () => {
 
-    if (window.history.length > 1) {
-        window.history.back();
-    } else {
-        showToast("Leaving the order summary...");
-        closeModal("leaveModal");
+    if (orderSubmitting) {
+        return;
     }
+
+    window.location.href = @json(route('cart'));
+
 });
 
 
@@ -1981,12 +1920,20 @@ document.getElementById("payButton").addEventListener("click", () => {
         return;
     }
 
-    if (orderProduct.stock < 1) {
-        showToast("This product is out of stock.");
+    if (orderItems.length === 0) {
+        showToast("There are no products to order.");
+        return;
+    }
+
+    const unavailableItem = orderItems.find(item => item.stock < 1);
+
+    if (unavailableItem) {
+        showToast("One of your products is out of stock.");
         return;
     }
 
     openModal("paymentModal");
+
 });
 
 
@@ -2002,18 +1949,18 @@ document.getElementById("cancelPaymentButton")
         }
 
         closeModal("paymentModal");
+
     });
 
 
 /* =========================================
    CONTINUE PAYMENT
-   SAVE ORDER TO DATABASE
+   SAVE ALL PRODUCTS TO DATABASE
 ========================================= */
 
 document.getElementById("continuePaymentButton")
     .addEventListener("click", async () => {
 
-        // Prevent duplicate submissions
         if (orderSubmitting || orderPlaced) {
             return;
         }
@@ -2024,38 +1971,28 @@ document.getElementById("continuePaymentButton")
             return;
         }
 
-        if (orderProduct.quantity < 1 ||
-            orderProduct.quantity > orderProduct.stock) {
-
-            showToast("Invalid product quantity.");
+        if (orderItems.length === 0) {
+            showToast("There are no products to order.");
             closeModal("paymentModal");
             return;
         }
 
-        // Get customer information displayed on the page
-        const customerDetails = document.querySelectorAll(
-            ".customer-line strong"
+        const invalidItem = orderItems.find(item =>
+            item.quantity < 1 ||
+            item.quantity > item.stock
         );
 
-        const customerName = customerDetails[0]?.textContent.trim() || "";
-        const mobileNumber = customerDetails[1]?.textContent.trim() || "";
-
-        const customerAddress = document.querySelector(
-            ".address-text"
-        )?.textContent.trim() || "";
-
-        // Validate customer information
-        if (!customerName || !mobileNumber || !customerAddress) {
-            showToast("Please provide complete delivery information.");
+        if (invalidItem) {
+            showToast("One of your product quantities is invalid.");
             closeModal("paymentModal");
             return;
         }
 
-        const continueButton = document.getElementById(
-            "continuePaymentButton"
-        );
+        const continueButton =
+            document.getElementById("continuePaymentButton");
 
-        const payButton = document.getElementById("payButton");
+        const payButton =
+            document.getElementById("payButton");
 
         const originalButtonText = continueButton.textContent;
 
@@ -2063,7 +2000,6 @@ document.getElementById("continuePaymentButton")
 
             orderSubmitting = true;
 
-            // Disable buttons while processing
             continueButton.disabled = true;
             payButton.disabled = true;
 
@@ -2074,9 +2010,24 @@ document.getElementById("continuePaymentButton")
                 Processing Order...
             `;
 
-            // Send order information to Laravel
+            updateQuantityButtons();
+
+            const payload = {
+
+                items: orderItems.map(item => ({
+                    product_id: item.id,
+                    quantity: item.quantity,
+                    cart_id: item.cartId
+                })),
+
+                cart_ids: orderItems
+                    .filter(item => item.cartId !== null)
+                    .map(item => item.cartId)
+
+            };
+
             const response = await fetch(
-                "{{ route('orders.store') }}",
+                @json(route('orders.store')),
                 {
                     method: "POST",
 
@@ -2089,19 +2040,7 @@ document.getElementById("continuePaymentButton")
                         ).getAttribute("content")
                     },
 
-                    body: JSON.stringify({
-
-                        product_id: orderProduct.id,
-
-                        quantity: orderProduct.quantity,
-
-                        customer_name: customerName,
-
-                        mobile_number: mobileNumber,
-
-                        address: customerAddress
-
-                    })
+                    body: JSON.stringify(payload)
                 }
             );
 
@@ -2115,26 +2054,27 @@ document.getElementById("continuePaymentButton")
 
             }
 
-            // Successfully saved to order_request
             orderPlaced = true;
 
             closeModal("paymentModal");
 
             showToast(
-                result.message || "Your order has been placed successfully."
+                result.message || "Your orders have been placed successfully."
             );
 
-            // Disable quantity controls
-            document.getElementById("decreaseQuantity").disabled = true;
-            document.getElementById("increaseQuantity").disabled = true;
-
-            // Update button after successful submission
             payButton.innerHTML = `
                 <i class="fa-solid fa-circle-check"></i>
                 Order Placed
             `;
 
             payButton.disabled = true;
+
+            updateQuantityButtons();
+
+            // Return to the cart after successful checkout.
+            setTimeout(() => {
+                window.location.href = @json(route('cart'));
+            }, 1800);
 
         } catch (error) {
 
@@ -2146,13 +2086,14 @@ document.getElementById("continuePaymentButton")
                 error.message || "Something went wrong. Please try again."
             );
 
-            // Allow the buyer to retry
             payButton.disabled = false;
 
             payButton.innerHTML = `
                 Buy Now
                 <i class="fa-solid fa-arrow-right"></i>
             `;
+
+            updateQuantityButtons();
 
         } finally {
 
@@ -2161,6 +2102,10 @@ document.getElementById("continuePaymentButton")
             continueButton.disabled = false;
 
             continueButton.textContent = originalButtonText;
+
+            if (!orderPlaced) {
+                updateQuantityButtons();
+            }
 
         }
 
@@ -2172,7 +2117,9 @@ document.getElementById("continuePaymentButton")
 ========================================= */
 
 function openModal(id) {
+
     document.getElementById(id).classList.add("open");
+
 }
 
 
@@ -2181,7 +2128,9 @@ function openModal(id) {
 ========================================= */
 
 function closeModal(id) {
+
     document.getElementById(id).classList.remove("open");
+
 }
 
 
@@ -2191,12 +2140,14 @@ function closeModal(id) {
 
 document.querySelectorAll(".modal-overlay").forEach(modal => {
 
-    modal.addEventListener("click", e => {
+    modal.addEventListener("click", event => {
 
-        if (e.target === modal && !orderSubmitting) {
+        if (event.target === modal && !orderSubmitting) {
             closeModal(modal.id);
         }
+
     });
+
 });
 
 
@@ -2204,14 +2155,16 @@ document.querySelectorAll(".modal-overlay").forEach(modal => {
    ESCAPE KEY
 ========================================= */
 
-document.addEventListener("keydown", e => {
+document.addEventListener("keydown", event => {
 
-    if (e.key === "Escape" && !orderSubmitting) {
+    if (event.key === "Escape" && !orderSubmitting) {
 
         document.querySelectorAll(".modal-overlay.open").forEach(modal => {
             closeModal(modal.id);
         });
+
     }
+
 });
 
 
@@ -2251,6 +2204,7 @@ function showToast(message) {
         }, 300);
 
     }, 2600);
+
 }
 
 
@@ -2272,19 +2226,20 @@ window.addEventListener("scroll", () => {
    CLICK POP
 ========================================= */
 
-document.addEventListener("click", e => {
+document.addEventListener("click", event => {
 
-    if (e.clientX === 0 && e.clientY === 0) return;
+    if (event.clientX === 0 && event.clientY === 0) return;
 
     const pop = document.createElement("span");
 
     pop.className = "click-pop";
-    pop.style.left = `${e.clientX}px`;
-    pop.style.top = `${e.clientY}px`;
+    pop.style.left = `${event.clientX}px`;
+    pop.style.top = `${event.clientY}px`;
 
     document.body.appendChild(pop);
 
     setTimeout(() => pop.remove(), 700);
+
 });
 
 

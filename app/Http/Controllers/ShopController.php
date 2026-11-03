@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ShopController extends Controller
 {
+    // Settings page
+    public function settings()
+    {
+        return view('user.settings');
+    }
     /**
      * Get all available products except products owned by the logged-in user.
      */
