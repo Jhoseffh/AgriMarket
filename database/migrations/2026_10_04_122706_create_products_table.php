@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->integer('quantity')->default(0);
             $table->string('oum');
-            $table->addColumn('longBlob', 'image')->nullable();
+            $table->binary('image')->nullable();
             $table->string('status')->default('active');
 
             $table->timestamps();
