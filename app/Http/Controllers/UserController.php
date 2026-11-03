@@ -1,16 +1,60 @@
 <?php
+
 namespace App\Http\Controllers;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class UserController extends Controller
 {
+    /**
+     * Convert the user's profile picture BLOB into a Base64 data URI.
+     */
+    private function prepareProfilePicture($user)
+    {
+        if (!$user || empty($user->profile_picture)) {
+            return $user;
+        }
+
+        $imageData = $user->profile_picture;
+
+        // Already converted into a data URI.
+        if (is_string($imageData) && str_starts_with($imageData, 'data:image/')) {
+            return $user;
+        }
+
+        $imageInfo = @getimagesizefromstring($imageData);
+
+        if ($imageInfo === false) {
+            $user->profile_picture = null;
+            return $user;
+        }
+
+        $mimeType = strtolower($imageInfo['mime']);
+
+        $allowedMimeTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/avif',
+        ];
+
+        if (!in_array($mimeType, $allowedMimeTypes, true)) {
+            $user->profile_picture = null;
+            return $user;
+        }
+
+        $user->profile_picture = 'data:' . $mimeType . ';base64,' .
+            base64_encode($imageData);
+
+        return $user;
+    }
+
     /**
      * Display the authenticated user's Report page.
      * Retrieves sales and inventory reports from the database.
@@ -18,6 +62,14 @@ class UserController extends Controller
     public function report()
     {
         $userId = auth()->id();
+
+        $user = DB::table('users')
+            ->where('id', $userId)
+            ->first();
+
+        abort_unless($user, 404);
+
+        $user = $this->prepareProfilePicture($user);
 
         /*
         |--------------------------------------------------------------------------
@@ -115,11 +167,11 @@ class UserController extends Controller
             ->values();
 
         return view('user.reports', compact(
+            'user',
             'sales',
             'inventory'
         ));
     }
-
 
     /**
      * Display the authenticated user's Profile page.
@@ -134,6 +186,8 @@ class UserController extends Controller
             ->first();
 
         abort_unless($user, 404);
+
+        $user = $this->prepareProfilePicture($user);
 
         /*
         |--------------------------------------------------------------------------
@@ -151,25 +205,25 @@ class UserController extends Controller
             $endDate = Carbon::today();
 
             $dailySales = DB::table('transactions')
-            ->selectRaw('DATE(created_at) as sale_date')
-            ->selectRaw('SUM(quantity) as total_quantity')
-            ->selectRaw("
-                SUM(
-                    CASE
-                        WHEN status = 'Completed' THEN total_amount
-                        ELSE 0
-                    END
-                ) as total_revenue
-            ")
-            ->where('seller_id', $userId)
-            ->whereBetween('created_at', [
-                $startDate->copy()->startOfDay(),
-                $endDate->copy()->endOfDay()
-            ])
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->orderBy('sale_date')
-            ->get()
-            ->keyBy('sale_date');
+                ->selectRaw('DATE(created_at) as sale_date')
+                ->selectRaw('SUM(quantity) as total_quantity')
+                ->selectRaw("
+                    SUM(
+                        CASE
+                            WHEN status = 'Completed' THEN total_amount
+                            ELSE 0
+                        END
+                    ) as total_revenue
+                ")
+                ->where('seller_id', $userId)
+                ->whereBetween('created_at', [
+                    $startDate->copy()->startOfDay(),
+                    $endDate->copy()->endOfDay()
+                ])
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->orderBy('sale_date')
+                ->get()
+                ->keyBy('sale_date');
 
             $labels = [];
             $quantityValues = [];
@@ -271,7 +325,7 @@ class UserController extends Controller
     }
 
     /**
-     * Upload and save the authenticated user's profile picture.
+     * Upload and save the authenticated user's profile picture as a database BLOB.
      */
     public function updateProfilePicture(Request $request)
     {
@@ -286,38 +340,21 @@ class UserController extends Controller
 
         $userId = auth()->id();
 
-        $user = DB::table('users')
-            ->where('id', $userId)
-            ->first();
-
-        abort_unless($user, 404);
-
-        $directory = public_path('image/profile');
-
-        if (!File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true);
-        }
-
         $file = $validated['profile_picture'];
 
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $imageData = file_get_contents($file->getRealPath());
 
-        $file->move($directory, $filename);
+        if ($imageData === false) {
+            return back()->withErrors([
+                'profile_picture' => 'Unable to read the uploaded image.',
+            ]);
+        }
 
         DB::table('users')
             ->where('id', $userId)
             ->update([
-                'profile_picture' => $filename,
+                'profile_picture' => $imageData,
             ]);
-
-        // Delete the previous picture after successfully saving the new one.
-        if (!empty($user->profile_picture)) {
-            $oldPicture = $directory . DIRECTORY_SEPARATOR . basename($user->profile_picture);
-
-            if (File::exists($oldPicture)) {
-                File::delete($oldPicture);
-            }
-        }
 
         return redirect('/profile')
             ->with('status', 'Your profile picture was updated successfully.');
@@ -333,6 +370,8 @@ class UserController extends Controller
             ->first();
 
         abort_unless($user, 404);
+
+        $user = $this->prepareProfilePicture($user);
 
         $savedAddresses = [];
         $activeAddress = $user->active_address;

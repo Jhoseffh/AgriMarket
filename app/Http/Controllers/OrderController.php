@@ -799,12 +799,8 @@ class OrderController extends Controller
             ], 404);
         }
 
-        $imagePath = public_path('image/product/' . $product->image);
-
-        if ($product->image && file_exists($imagePath)) {
-            unlink($imagePath);
-        }
-
+        // Product images are stored directly in the products.image BLOB column.
+        // No filesystem image needs to be deleted.
         $product->delete();
 
         return response()->json([
@@ -882,13 +878,17 @@ class OrderController extends Controller
                 ->withInput();
         }
 
-        $imageName = time() . '_' . uniqid() . '.' .
-            $request->file('image')->getClientOriginalExtension();
+        // Read the uploaded image as binary data and store it in the
+        // products.image LONG BLOB column instead of saving a file path.
+        $imageFile = $request->file('image');
+        $imageBinary = file_get_contents($imageFile->getRealPath());
 
-        $request->file('image')->move(
-            public_path('image/product'),
-            $imageName
-        );
+        if ($imageBinary === false || $imageBinary === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'The uploaded product image could not be read.',
+            ], 422);
+        }
 
         $productId = DB::table('products')->insertGetId([
             'seller_id'    => auth()->id(),
@@ -897,7 +897,7 @@ class OrderController extends Controller
             'price'        => $request->price,
             'quantity'     => $request->quantity,
             'oum'          => $request->oum,
-            'image'        => $imageName,
+            'image'        => $imageBinary,
             'status'       => 'Available',
             'created_at'   => now(),
             'updated_at'   => now(),
@@ -908,10 +908,21 @@ class OrderController extends Controller
             ->first();
 
         if ($request->expectsJson()) {
+            // Never return the raw binary BLOB in JSON. It may contain
+            // invalid UTF-8 bytes and cause the AJAX response to fail.
+            $productResponse = (array) $product;
+            unset($productResponse['image']);
+
+            $mimeType = $imageFile->getMimeType() ?: 'image/jpeg';
+
+            $productResponse['image_data_url'] =
+                'data:' . $mimeType . ';base64,' .
+                base64_encode($imageBinary);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Product added successfully.',
-                'product' => $product,
+                'product' => $productResponse,
             ], 201);
         }
 

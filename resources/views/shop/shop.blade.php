@@ -1902,41 +1902,44 @@
             "All Groceries"
         ];
 
-        /* Product cards */
-        function productCard(product,index) {
-            const [id,name,price,quantity,uom,image] = product;
+        
+        function productCard(product, index) {
+            const [id, name, price, quantity, uom, image] = product;
 
             const escapedName = String(name)
-                .replace(/&/g,"&amp;")
-                .replace(/</g,"&lt;")
-                .replace(/>/g,"&gt;")
-                .replace(/"/g,"&quot;")
-                .replace(/'/g,"&#039;");
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
 
             const safeImage = image == null ? "" : String(image)
-                .replace(/&/g,"&amp;")
-                .replace(/"/g,"&quot;")
-                .replace(/</g,"&lt;")
-                .replace(/>/g,"&gt;");
+                .trim()
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
 
             const safeUom = uom == null ? "" : String(uom)
-                .replace(/&/g,"&amp;")
-                .replace(/"/g,"&quot;")
-                .replace(/</g,"&lt;")
-                .replace(/>/g,"&gt;");
+                .replace(/&/g, "&amp;")
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
 
             const validProductId = Number.isInteger(Number(id)) && Number(id) > 0
                 ? Number(id)
                 : "";
+
+            // Only accept database image data URIs.
+            const validImage = /^data:image\/(jpeg|png|gif|webp|avif);base64,[A-Za-z0-9+/=]+$/i.test(safeImage);
 
             return `
                 <article class="product-card" data-name="${escapedName.toLowerCase()}">
                     ${index === 0 ? '<span class="product-badge">FEATURED</span>' : ''}
 
                     <div class="product-image">
-                        ${safeImage.trim() !== "" ? `
+                        ${validImage ? `
                             <img
-                                src="{{ asset('image/product') }}/${safeImage}"
+                                src="${safeImage}"
                                 alt="${escapedName}"
                                 class="product-photo"
                                 loading="lazy"
@@ -1965,9 +1968,9 @@
                         <div class="product-name">${escapedName}</div>
 
                         <div class="product-price">
-                            ₱${Number(price).toLocaleString("en-PH",{
-                                minimumFractionDigits:2,
-                                maximumFractionDigits:2
+                            ₱${Number(price).toLocaleString("en-PH", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
                             })}
                         </div>
 
@@ -2000,6 +2003,7 @@
                 </article>
             `;
         }
+
 
         function renderProducts() {
             document.querySelectorAll(".product-section").forEach(section => {

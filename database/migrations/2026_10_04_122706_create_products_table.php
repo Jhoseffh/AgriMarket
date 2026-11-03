@@ -20,8 +20,8 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->integer('quantity')->default(0);
             $table->string('oum');
-            $table->string('image')->nullable();
-            $table->string('status')->default('active');
+            $table->longBlob('image')->nullable();
+                $table->string('status')->default('active');
 
             $table->timestamps();
         });

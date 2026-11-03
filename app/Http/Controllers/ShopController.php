@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,47 @@ class ShopController extends Controller
     }
 
     /**
+     * Convert product image BLOBs into safe Base64 data URIs.
+     * This prevents raw binary image data from causing JSON UTF-8 errors.
+     */
+    private function prepareProductImages($products)
+    {
+        return $products->map(function ($product) {
+
+            $imageData = $product->image;
+            $imageDataUrl = null;
+
+            if (!empty($imageData)) {
+
+                $imageInfo = @getimagesizefromstring($imageData);
+
+                if ($imageInfo !== false && !empty($imageInfo['mime'])) {
+
+                    $allowedMimeTypes = [
+                        'image/jpeg',
+                        'image/png',
+                        'image/gif',
+                        'image/webp',
+                        'image/avif'
+                    ];
+
+                    $mimeType = strtolower($imageInfo['mime']);
+
+                    if (in_array($mimeType, $allowedMimeTypes, true)) {
+                        $imageDataUrl = 'data:' . $mimeType .
+                            ';base64,' . base64_encode($imageData);
+                    }
+                }
+            }
+
+            // Replace the raw BLOB with the safe image data URI.
+            $product->setAttribute('image', $imageDataUrl);
+
+            return $product;
+        });
+    }
+
+    /**
      * Get best-selling products with a specified limit.
      */
     private function getBestSellingProducts(int $limit)
@@ -40,7 +82,7 @@ class ShopController extends Controller
             ->whereIn('status', ['Completed', 'Shipping'])
             ->groupBy('product_id');
 
-        return $this->visibleProducts()
+        $products = $this->visibleProducts()
             ->joinSub($bestSellerSales, 'sales', function ($join) {
                 $join->on(
                     'products.product_id',
@@ -52,6 +94,8 @@ class ShopController extends Controller
             ->limit($limit)
             ->select('products.*')
             ->get();
+
+        return $this->prepareProductImages($products);
     }
 
     /**
@@ -76,6 +120,8 @@ class ShopController extends Controller
             ->orderBy('product_id', 'desc')
             ->get();
 
+        $products = $this->prepareProductImages($products);
+
         // Only 6 best-selling products in shop.blade.php
         $bestSellerProducts = $this->bestSellingProducts();
 
@@ -92,9 +138,13 @@ class ShopController extends Controller
             ->orderBy('product_id', 'desc')
             ->get();
 
+        $products = $this->prepareProductImages($products);
+
         $allProducts = $this->visibleProducts()
             ->orderBy('product_id', 'desc')
             ->get();
+
+        $allProducts = $this->prepareProductImages($allProducts);
 
         return view('shop.search', compact(
             'products',
@@ -181,9 +231,14 @@ class ShopController extends Controller
                 ->get();
         }
 
+        // Convert product images before passing products to the Blade view.
+        $products = $this->prepareProductImages($products);
+
         $allProducts = $this->visibleProducts()
             ->orderBy('product_id', 'desc')
             ->get();
+
+        $allProducts = $this->prepareProductImages($allProducts);
 
         return view('shop.category', compact(
             'products',

@@ -2107,7 +2107,15 @@ footer{
 
                     <div class="product-image">
                         @if(!empty($product->image))
-                            <img src="{{ asset('image/product/' . $product->image) }}" alt="{{ $product->product_name }}" style="width:100%;height:100%;object-fit:cover;display:block;">
+                            @php
+                                $imageInfo = @getimagesizefromstring($product->image);
+                                $imageMime = $imageInfo['mime'] ?? 'image/jpeg';
+                            @endphp
+                            <img
+                                src="data:{{ $imageMime }};base64,{{ base64_encode($product->image) }}"
+                                alt="{{ $product->product_name }}"
+                                style="width:100%;height:100%;object-fit:cover;display:block;"
+                            >
                         @else
                             <div class="placeholder">
                                 <div class="placeholder-content">
@@ -3148,13 +3156,24 @@ function stockStatus(quantity){
     return {label:"In Stock", badge:"IN STOCK", color:"var(--primary-green)"};
 }
 
-function stockCardHTML(product){
+function stockCardHTML(product, uploadedImageDataUrl = null){
     const id = Number(product.product_id);
     const quantity = Number(product.quantity);
     const status = stockStatus(quantity);
     const name = escapeHTML(product.product_name);
-    const image = product.image
-        ? `<img src="${escapeHTML("{{ asset('image/product') }}/")}${encodeURIComponent(product.image)}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+    const imageSource = uploadedImageDataUrl
+        || product.image_data_url
+        || product.image_base64
+        || "";
+
+    const normalizedImageSource = imageSource
+        ? (imageSource.startsWith("data:")
+            ? imageSource
+            : `data:${product.image_mime || "image/jpeg"};base64,${imageSource}`)
+        : "";
+
+    const image = normalizedImageSource
+        ? `<img src="${escapeHTML(normalizedImageSource)}" alt="${name}" style="width:100%;height:100%;object-fit:cover;display:block;">`
         : `<div class="placeholder"><div class="placeholder-content"><i class="fa-regular fa-image"></i><strong>PRODUCT IMAGE</strong><small>${name}</small></div></div>`;
 
     return `
@@ -3410,7 +3429,22 @@ document.getElementById("addStockForm").addEventListener("submit", async functio
         const empty = document.querySelector("#stockGrid .stock-empty-state");
         if(empty) empty.remove();
 
-        document.getElementById("stockGrid").insertAdjacentHTML("afterbegin", stockCardHTML(result.product));
+        // Use the selected file for the new card's immediate image preview.
+        // The database stores the image as a BLOB, not as a public-folder filename.
+        const uploadedImageFile = imageInput.files[0];
+        const uploadedImageDataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("Unable to preview the uploaded product image."));
+
+            reader.readAsDataURL(uploadedImageFile);
+        });
+
+        document.getElementById("stockGrid").insertAdjacentHTML(
+            "afterbegin",
+            stockCardHTML(result.product, uploadedImageDataUrl)
+        );
 
         const totalProductsElement = document.getElementById("totalProducts");
         if(totalProductsElement){

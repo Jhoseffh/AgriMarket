@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -105,6 +104,44 @@ class CartController extends Controller
             )
             ->orderBy('carts.cart_id', 'desc')
             ->get();
+
+        $cartItems = $cartItems->map(function ($item) {
+
+            // Never return the raw LONGBLOB in a JSON response.
+            $imageData = $item->image;
+            $imageDataUrl = null;
+
+            if (!empty($imageData)) {
+
+                $imageInfo = @getimagesizefromstring($imageData);
+
+                if ($imageInfo !== false && !empty($imageInfo['mime'])) {
+
+                    $allowedMimeTypes = [
+                        'image/jpeg',
+                        'image/png',
+                        'image/gif',
+                        'image/webp',
+                        'image/avif'
+                    ];
+
+                    $mimeType = strtolower($imageInfo['mime']);
+
+                    if (in_array($mimeType, $allowedMimeTypes, true)) {
+                        $imageDataUrl = 'data:' . $mimeType .
+                            ';base64,' . base64_encode($imageData);
+                    }
+                }
+            }
+
+            // Remove the binary image before Laravel converts the result to JSON.
+            unset($item->image);
+
+            // Return the image as a safe Base64 data URI instead.
+            $item->image_data_url = $imageDataUrl;
+
+            return $item;
+        });
 
         return response()->json($cartItems);
     }

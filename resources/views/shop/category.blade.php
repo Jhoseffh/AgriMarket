@@ -2281,7 +2281,7 @@
                         <div class="product-image">
                             @if (!empty($product->image))
                                 <img
-                                    src="{{ asset('image/product/' . $product->image) }}"
+                                    src="{{ $product->image }}"
                                     alt="{{ $product->product_name }}"
                                     class="product-photo"
                                     loading="lazy"

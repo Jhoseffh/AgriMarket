@@ -2456,7 +2456,7 @@
 
                         total_amount:totalAmount,
 
-                        image:item.image || null
+                        image:item.image_data_url || null
 
                     };
 
@@ -2497,10 +2497,16 @@
 
             const isSelected = selectedItems.has(item.id);
 
-            const imageHTML = item.image
+            const imageSource =
+                typeof item.image === "string" &&
+                /^data:image\/(?:jpeg|png|gif|webp|avif);base64,/i.test(item.image)
+                    ? item.image
+                    : null;
+
+            const imageHTML = imageSource
                 ? `
                     <img
-                        src="{{ asset('image') }}/${encodeURIComponent(item.image)}"
+                        src="${imageSource}"
                         alt="${escapeHTML(item.name)}"
                         onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
                     >

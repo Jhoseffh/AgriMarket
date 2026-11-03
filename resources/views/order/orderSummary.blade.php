@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1443,12 +1442,35 @@ footer {
                         data-shipping="{{ $item->shipping_fee }}"
                     >
 
+                        @php
+                            $productImage = $item->image ?? null;
+                            $imageInfo = is_string($productImage) && $productImage !== ''
+                                ? @getimagesizefromstring($productImage)
+                                : false;
+
+                            $imageMime = $imageInfo['mime'] ?? null;
+                            $allowedImageMimes = [
+                                'image/jpeg',
+                                'image/png',
+                                'image/gif',
+                                'image/webp',
+                                'image/avif',
+                            ];
+
+                            $productImageSrc = $imageMime && in_array($imageMime, $allowedImageMimes, true)
+                                ? 'data:' . $imageMime . ';base64,' . base64_encode($productImage)
+                                : null;
+                        @endphp
+
                         <div class="product-image">
-                            <img
-                                src="{{ asset('image/product/' . $item->image) }}"
-                                alt="{{ $item->product_name }}"
-                                onerror="this.style.display='none';"
-                            >
+                            @if($productImageSrc)
+                                <img
+                                    src="{{ $productImageSrc }}"
+                                    alt="{{ $item->product_name }}"
+                                >
+                            @else
+                                <i class="fa-regular fa-image" aria-label="No product image available"></i>
+                            @endif
                         </div>
 
                         <div class="product-details">

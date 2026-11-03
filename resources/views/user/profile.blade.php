@@ -1067,8 +1067,9 @@
 
                         <img
                             id="profileImage"
-                            src="{{ asset('image/profile/' . basename($user->profile_picture)) }}"
+                            src="{{ $user->profile_picture }}"
                             alt="Profile Picture"
+                            onerror="this.style.display='none'; document.getElementById('profilePlaceholder').style.display='grid';"
                         >
 
                         <div class="profile-picture-placeholder"
