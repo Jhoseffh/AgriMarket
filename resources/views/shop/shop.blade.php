@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1299,9 +1300,6 @@
         </div>
 
         <div class="nav-actions">
-            <button class="icon-btn" title="Notifications" onclick="showToast('You have no new notifications.')">
-                <i class="fa-regular fa-bell"></i>
-            </button>
 
             <!-- FIXED SHOPPING CART BUTTON -->
             <a
@@ -1718,12 +1716,16 @@
             ],
 
             "Best Sellers":[
-                [null,"Premium Rice",89,45,"kg",""],
-                [null,"Fresh Bananas",65,28,"kg",""],
-                [null,"Native Garlic",78,22,"kg",""],
-                [null,"Red Onion",82,26,"kg",""],
-                [null,"Fresh Coconut",60,35,"piece",""],
-                [null,"Farm Eggs",92,24,"dozen",""]
+                @foreach($bestSellerProducts as $product)
+                    [
+                        {{ $product->product_id }},
+                        @json($product->product_name),
+                        {{ $product->price }},
+                        {{ $product->quantity }},
+                        @json($product->oum),
+                        @json($product->image)
+                    ],
+                @endforeach
             ],
 
             "Fruits":[

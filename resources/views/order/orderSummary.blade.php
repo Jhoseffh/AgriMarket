@@ -1589,26 +1589,26 @@ footer {
         <div class="footer-links">
             <h4>AgriMarket</h4>
             <ul>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Contact</a></li>
-                <li><a href="#">Help & Support</a></li>
+                <li><a href="">About Us</a></li>
+                <li><a href="">Contact</a></li>
+                <li><a href="">Help & Support</a></li>
             </ul>
         </div>
 
         <div class="footer-links">
             <h4>Legal</h4>
             <ul>
-                <li><a href="#">Terms & Conditions</a></li>
-                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="">Terms & Conditions</a></li>
+                <li><a href="">Privacy Policy</a></li>
             </ul>
         </div>
 
         <div class="footer-links">
             <h4>Marketplace</h4>
             <ul>
-                <li><a href="#">New & Fresh</a></li>
-                <li><a href="#">Best Sellers</a></li>
-                <li><a href="#">Groceries</a></li>
+                <li><a href="">New & Fresh</a></li>
+                <li><a href="">Best Sellers</a></li>
+                <li><a href="">Groceries</a></li>
             </ul>
         </div>
 

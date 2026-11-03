@@ -2776,7 +2776,7 @@
     <div class="footer-grid">
 
         <div class="footer-brand">
-            <a href="#" class="brand-logo" style="color:#fff">
+            <a href="" class="brand-logo" style="color:#fff">
                 <i class="fa-solid fa-leaf"></i>
                 agrimarket
             </a>
@@ -2793,15 +2793,15 @@
 
             <ul>
                 <li>
-                    <a href="#">About Us</a>
+                    <a href="">About Us</a>
                 </li>
 
                 <li>
-                    <a href="#">Contact</a>
+                    <a href="">Contact</a>
                 </li>
 
                 <li>
-                    <a href="#">Help &amp; Support</a>
+                    <a href="">Help &amp; Support</a>
                 </li>
             </ul>
         </div>
@@ -2811,11 +2811,11 @@
 
             <ul>
                 <li>
-                    <a href="#">Terms &amp; Conditions</a>
+                    <a href="">Terms &amp; Conditions</a>
                 </li>
 
                 <li>
-                    <a href="#">Privacy Policy</a>
+                    <a href="">Privacy Policy</a>
                 </li>
             </ul>
         </div>
@@ -2833,7 +2833,7 @@
                 </li>
 
                 <li>
-                    <a href="#">Groceries</a>
+                    <a href="">Groceries</a>
                 </li>
             </ul>
         </div>

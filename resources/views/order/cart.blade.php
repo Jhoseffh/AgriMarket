@@ -1372,10 +1372,6 @@
 
         <div class="nav-actions">
 
-            <button class="icon-btn" title="Notifications" onclick="showToast('You have no new notifications.')">
-                <i class="fa-regular fa-bell"></i>
-            </button>
-
             <button class="icon-btn" title="Shopping Cart" onclick="document.getElementById('shoppingCartSection').scrollIntoView({behavior:'smooth'})">
                 <i class="fa-solid fa-cart-shopping"></i>
             </button>
@@ -1390,19 +1386,15 @@
 
                 <div class="dropdown" id="profileMenu">
 
-                    <a href="#">
+                    <a href="{{ route('profile') }}">
                         <i class="fa-regular fa-user"></i>Profile
                     </a>
 
-                    <a href="#">
+                    <a href="{{ route('orders') }}">
                         <i class="fa-solid fa-box"></i>My Orders
                     </a>
 
-                    <a href="#myPurchasesSection">
-                        <i class="fa-solid fa-bag-shopping"></i>My Purchases
-                    </a>
-
-                    <a href="#">
+                    <a href="{{ route('settings') }}">
                         <i class="fa-solid fa-gear"></i>Settings
                     </a>
 
@@ -1778,9 +1770,9 @@
                 <h4>AgriMarket</h4>
 
                 <ul>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">Help & Support</a></li>
+                    <li><a href="">About Us</a></li>
+                    <li><a href="">Contact</a></li>
+                    <li><a href="">Help & Support</a></li>
                 </ul>
 
             </div>
@@ -1790,8 +1782,8 @@
                 <h4>Legal</h4>
 
                 <ul>
-                    <li><a href="#">Terms & Conditions</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="">Terms & Conditions</a></li>
+                    <li><a href="">Privacy Policy</a></li>
                 </ul>
 
             </div>
@@ -1801,9 +1793,9 @@
                 <h4>Marketplace</h4>
 
                 <ul>
-                    <li><a href="#">New & Fresh</a></li>
-                    <li><a href="#">Best Sellers</a></li>
-                    <li><a href="#">Groceries</a></li>
+                    <li><a href="">New & Fresh</a></li>
+                    <li><a href="">Best Sellers</a></li>
+                    <li><a href="">Groceries</a></li>
                 </ul>
 
             </div>

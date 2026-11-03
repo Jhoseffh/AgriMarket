@@ -197,6 +197,68 @@
             transform: translateY(-2px);
         }
 
+        /* SHOPPING CART BUTTON - FIXED */
+        .nav-actions .cart-icon-btn {
+            position:relative;
+            width:42px;
+            min-width:42px;
+            max-width:42px;
+            height:42px;
+            min-height:42px;
+            flex:0 0 42px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:0;
+            margin:0;
+            overflow:visible;
+            isolation:isolate;
+            border:1px solid transparent;
+            border-radius:10px;
+            background:transparent;
+            color:var(--primary-dark);
+            text-decoration:none;
+            line-height:1;
+            vertical-align:middle;
+            white-space:nowrap;
+            transition:
+                background .3s ease,
+                border-color .3s ease,
+                color .3s ease,
+                transform .3s var(--ease);
+        }
+
+        .nav-actions .cart-icon-btn i {
+            position:relative;
+            display:block;
+            width:auto;
+            height:auto;
+            margin:0;
+            padding:0;
+            font-size:1.08rem;
+            line-height:1;
+            text-align:center;
+            color:inherit;
+            transform:none;
+        }
+
+        .nav-actions .cart-icon-btn:hover {
+            background:#fff;
+            border-color:var(--border-color);
+            color:var(--primary-green);
+            transform:translateY(-2px);
+        }
+
+        .nav-actions .cart-icon-btn:focus-visible {
+            outline:3px solid rgba(45,90,63,.25);
+            outline-offset:3px;
+        }
+
+        .nav-actions .cart-icon-btn:active {
+            transform:scale(.94);
+        }
+
+
         .badge {
             position: absolute;
             top: 3px;
@@ -941,16 +1003,15 @@
 
     <div class="nav-actions">
 
-        <button class="icon-btn" title="Notifications"
-            onclick="showToast('You have no new notifications.')">
-            <i class="fa-regular fa-bell"></i>
-            <span class="badge">2</span>
-        </button>
-
-        <a href="{{ route('cart') }}" class="icon-btn" title="Shopping Cart">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span class="badge" id="cartCount">0</span>
-        </a>
+            <!-- FIXED SHOPPING CART BUTTON -->
+            <a
+                href="{{ route('cart') }}"
+                class="icon-btn cart-icon-btn"
+                title="Shopping Cart"
+                aria-label="Shopping Cart"
+            >
+                <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+            </a>
 
         <div class="dropdown-wrap">
 
@@ -1264,9 +1325,9 @@
             <h4>AgriMarket</h4>
 
             <ul>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Contact</a></li>
-                <li><a href="#">Help & Support</a></li>
+                <li><a href="">About Us</a></li>
+                <li><a href="">Contact</a></li>
+                <li><a href="">Help & Support</a></li>
             </ul>
 
         </div>
@@ -1276,8 +1337,8 @@
             <h4>Legal</h4>
 
             <ul>
-                <li><a href="#">Terms & Conditions</a></li>
-                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="">Terms & Conditions</a></li>
+                <li><a href="">Privacy Policy</a></li>
             </ul>
 
         </div>

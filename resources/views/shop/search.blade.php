@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>AgriMarket - Search</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -913,6 +914,122 @@ a {
     transform: none;
 }
 
+/* Add to Cart confirmation modal */
+.cart-modal-overlay {
+    position:fixed;
+    inset:0;
+    z-index:5000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(15,28,20,.48);
+    backdrop-filter:blur(5px);
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .3s ease,visibility .3s ease;
+}
+
+.cart-modal-overlay.open {
+    opacity:1;
+    visibility:visible;
+}
+
+.cart-modal {
+    width:min(420px,100%);
+    padding:28px;
+    background:#fff;
+    border:1px solid rgba(228,231,236,.9);
+    border-radius:20px;
+    box-shadow:0 25px 70px rgba(0,0,0,.2);
+    text-align:center;
+    transform:translateY(18px) scale(.96);
+    transition:transform .35s var(--spring);
+}
+
+.cart-modal-overlay.open .cart-modal {
+    transform:translateY(0) scale(1);
+}
+
+.cart-modal-icon {
+    width:62px;
+    height:62px;
+    display:grid;
+    place-items:center;
+    margin:0 auto 16px;
+    border-radius:18px;
+    background:var(--soft-green);
+    color:var(--primary-green);
+    font-size:1.55rem;
+}
+
+.cart-modal h3 {
+    color:var(--primary-dark);
+    font-size:1.2rem;
+    font-weight:800;
+}
+
+.cart-modal p {
+    margin-top:8px;
+    color:var(--text-muted);
+    font-size:.85rem;
+    line-height:1.6;
+}
+
+.cart-modal-product {
+    margin-top:12px;
+    padding:11px 13px;
+    border-radius:10px;
+    background:var(--bg-cream);
+    color:var(--primary-dark);
+    font-size:.86rem;
+    font-weight:800;
+    overflow-wrap:anywhere;
+}
+
+.cart-modal-actions {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-top:22px;
+}
+
+.cart-modal-btn {
+    min-height:43px;
+    border:0;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:.8rem;
+    font-weight:800;
+    transition:.25s var(--ease);
+}
+
+.cart-modal-cancel {
+    background:#f1f2f3;
+    color:#475467;
+}
+
+.cart-modal-cancel:hover {
+    background:#e5e7eb;
+    transform:translateY(-2px);
+}
+
+.cart-modal-confirm {
+    background:var(--primary-dark);
+    color:#fff;
+}
+
+.cart-modal-confirm:hover {
+    background:var(--primary-green);
+    transform:translateY(-2px);
+}
+
+.cart-modal-confirm:disabled {
+    opacity:.65;
+    cursor:not-allowed;
+    transform:none;
+}
+
 /* TOAST */
 
 .toast-container {
@@ -1382,10 +1499,10 @@ footer {
             class="icon-btn"
             title="Shopping Cart"
             type="button"
-            onclick="showToast('Your cart is ready.')"
+            onclick="window.location.href='{{ route('cart') }}'"
         >
             <i class="fa-solid fa-cart-shopping"></i>
-            <span class="badge" id="cartCount">0</span>
+            <span class="badge" id="cartCount" style="display:none;">0</span>
         </button>
 
         <!-- PROFILE -->
@@ -1396,7 +1513,7 @@ footer {
             </button>
 
             <div class="dropdown" id="profileMenu">
-                <a href="{{ url('/profile') }}">
+                <a href="{{ route('profile') }}">
                     <i class="fa-regular fa-user"></i>
                     Profile
                 </a>
@@ -1406,15 +1523,19 @@ footer {
                     My Orders
                 </a>
 
-                <a href="{{ url('/settings') }}">
+                <a href="{{ route('settings') }}">
                     <i class="fa-solid fa-gear"></i>
                     Settings
                 </a>
 
-                <a href="{{ url('/logout') }}">
+                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     Logout
                 </a>
+
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                    @csrf
+                </form>
             </div>
         </div>
 
@@ -1539,7 +1660,8 @@ footer {
                             <button
                                 class="card-btn cart-btn"
                                 type="button"
-                                onclick='addToCart(@json($product->product_name))'
+                                data-product-id="{{ $product->product_id }}"
+                                data-product-name="{{ $product->product_name }}"
                             >
                                 <i class="fa-solid fa-cart-plus"></i>
                                 Add to Cart
@@ -1548,7 +1670,7 @@ footer {
                             <button
                                 class="card-btn buy-btn"
                                 type="button"
-                                onclick='buyNow(@json($product->product_name))'
+                                onclick="buyNow({{ $product->product_id }})"
                             >
                                 Buy Now
                             </button>
@@ -1645,6 +1767,34 @@ footer {
     </div>
 </footer>
 
+<!-- ADD TO CART CONFIRMATION POPUP -->
+<div class="cart-modal-overlay" id="cartModal" aria-hidden="true">
+    <div class="cart-modal" role="dialog" aria-modal="true" aria-labelledby="cartModalTitle">
+        <div class="cart-modal-icon">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+
+        <h3 id="cartModalTitle">Add to Cart?</h3>
+
+        <p>Are you sure you want to add this product to your shopping cart?</p>
+
+        <div class="cart-modal-product" id="cartModalProduct">
+            Product name
+        </div>
+
+        <div class="cart-modal-actions">
+            <button type="button" class="cart-modal-btn cart-modal-cancel" id="cancelCartButton">
+                Cancel
+            </button>
+
+            <button type="button" class="cart-modal-btn cart-modal-confirm" id="confirmCartButton">
+                <i class="fa-solid fa-cart-plus"></i>
+                Yes, Add to Cart
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- TOAST -->
 
 <div class="toast-container" id="toastContainer"></div>
@@ -1677,24 +1827,180 @@ function updateSearchInformation() {
 
 updateSearchInformation();
 
-/* CART */
+/* CART AND BUY NOW - DATABASE INTEGRATION (same as Category page) */
 
-let cartCount = 0;
+const cartModal = document.getElementById("cartModal");
+const cartModalProduct = document.getElementById("cartModalProduct");
+const cancelCartButton = document.getElementById("cancelCartButton");
+const confirmCartButton = document.getElementById("confirmCartButton");
 
-function addToCart(name) {
-    cartCount++;
+let selectedCartProductId = null;
+let selectedCartProductName = "";
+let isAddingToCart = false;
 
-    document.getElementById("cartCount").textContent = cartCount;
+function addToCart(productId, productName) {
+    if (!Number.isInteger(productId) || productId <= 0) {
+        showToast("This product cannot be added to your cart.");
+        return;
+    }
 
-    showToast(`${name} was added to your cart.`);
+    selectedCartProductId = productId;
+    selectedCartProductName = productName;
+    cartModalProduct.textContent = productName;
+    cartModal.classList.add("open");
+    cartModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
 }
 
-/* BUY NOW */
+function closeCartModal() {
+    cartModal.classList.remove("open");
+    cartModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    selectedCartProductId = null;
+    selectedCartProductName = "";
+    confirmCartButton.disabled = false;
+    confirmCartButton.innerHTML = `
+        <i class="fa-solid fa-cart-plus"></i>
+        Yes, Add to Cart
+    `;
+}
 
-function buyNow(name) {
-    showToast(
-        `Buy Now selected for ${name}. Connect this to your checkout route.`
-    );
+document.addEventListener("click", function(event) {
+    const button = event.target.closest(".cart-btn");
+    if (!button) return;
+
+    const productId = Number(button.dataset.productId);
+    const productName = button.dataset.productName || "Product";
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+        showToast("This product cannot be added to your cart.");
+        return;
+    }
+
+    addToCart(productId, productName);
+});
+
+cancelCartButton.addEventListener("click", closeCartModal);
+
+cartModal.addEventListener("click", event => {
+    if (event.target === cartModal) closeCartModal();
+});
+
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && cartModal.classList.contains("open")) {
+        closeCartModal();
+    }
+});
+
+confirmCartButton.addEventListener("click", async () => {
+    if (isAddingToCart) return;
+
+    if (!selectedCartProductId) {
+        showToast("Please select a valid product.");
+        closeCartModal();
+        return;
+    }
+
+    const productId = selectedCartProductId;
+    const addedProductName = selectedCartProductName || "Product";
+
+    isAddingToCart = true;
+    confirmCartButton.disabled = true;
+    confirmCartButton.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Adding...
+    `;
+
+    let response;
+
+    try {
+        response = await fetch("{{ route('cart.add') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ product_id: productId })
+        });
+    } catch (error) {
+        // Network failure: keep the popup open so the user can retry.
+        isAddingToCart = false;
+        confirmCartButton.disabled = false;
+        confirmCartButton.innerHTML = `
+            <i class="fa-solid fa-cart-plus"></i>
+            Yes, Add to Cart
+        `;
+        showToast("Something went wrong. Please try again.");
+        return;
+    }
+
+    isAddingToCart = false;
+
+    // A redirect to an HTML page (for example the login page) is not a cart response.
+    const isJson = (response.headers.get("content-type") || "").includes("application/json");
+
+    if (!isJson && response.redirected) {
+        window.location.href = response.url;
+        return;
+    }
+
+    let result = {};
+
+    if (isJson) {
+        try {
+            result = await response.json();
+        } catch (error) {
+            result = {};
+        }
+    }
+
+    // The server has answered, so the popup always closes. This covers
+    // success as well as "already in cart" and other server messages.
+    closeCartModal();
+
+    if (!response.ok || !isJson) {
+        showToast(result.message || "Unable to add this product to your cart.");
+        return;
+    }
+
+    // Only show the badge when the backend reports a real cart count.
+    const reportedCount = Number(result.cart_count ?? result.cartCount);
+    const cartBadge = document.getElementById("cartCount");
+
+    if (cartBadge && Number.isFinite(reportedCount) && reportedCount > 0) {
+        cartBadge.textContent = reportedCount;
+        cartBadge.style.display = "";
+    }
+
+    showToast(result.message || `${addedProductName} was added to your cart.`);
+});
+
+function buyNow(productId) {
+    if (!Number.isInteger(productId) || productId <= 0) {
+        showToast("This product cannot be purchased. Please select an available product.");
+        return;
+    }
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "{{ route('ordersummary') }}";
+
+    const csrf = document.createElement("input");
+    csrf.type = "hidden";
+    csrf.name = "_token";
+    csrf.value = "{{ csrf_token() }}";
+
+    const productInput = document.createElement("input");
+    productInput.type = "hidden";
+    productInput.name = "product_id";
+    productInput.value = productId;
+
+    form.appendChild(csrf);
+    form.appendChild(productInput);
+    document.body.appendChild(form);
+    form.submit();
 }
 
 /* TOAST */
@@ -1937,10 +2243,29 @@ function getPageSize() {
     return window.matchMedia("(max-width: 768px)").matches ? 18 : 36;
 }
 
+// Original Laravel-rendered order, captured once before any sorting.
+const originalCards = Array.from(
+    productGrid.querySelectorAll(".product-card")
+);
+
+const originalCardIndex = new Map(
+    originalCards.map((card, index) => [card, index])
+);
+
+function getCardPrice(card) {
+    const rawPrice = (card.dataset.price || "").trim();
+
+    if (rawPrice === "") {
+        return null;
+    }
+
+    const price = Number(rawPrice);
+
+    return Number.isFinite(price) ? price : null;
+}
+
 function getSortedCards() {
-    const cards = Array.from(
-        productGrid.querySelectorAll(".product-card")
-    );
+    const cards = originalCards.slice();
 
     const sortValue = sortSelect.value;
 
@@ -1948,14 +2273,28 @@ function getSortedCards() {
         cards.sort((a, b) =>
             Number(b.dataset.id) - Number(a.dataset.id)
         );
-    } else if (sortValue === "price_low") {
-        cards.sort((a, b) =>
-            Number(a.dataset.price) - Number(b.dataset.price)
-        );
-    } else if (sortValue === "price_high") {
-        cards.sort((a, b) =>
-            Number(b.dataset.price) - Number(a.dataset.price)
-        );
+    } else if (sortValue === "price_low" || sortValue === "price_high") {
+        const direction = sortValue === "price_low" ? 1 : -1;
+
+        cards.sort((a, b) => {
+            const priceA = getCardPrice(a);
+            const priceB = getCardPrice(b);
+
+            // Missing or invalid prices always go to the end.
+            if (priceA === null && priceB === null) {
+                return originalCardIndex.get(a) - originalCardIndex.get(b);
+            }
+
+            if (priceA === null) return 1;
+            if (priceB === null) return -1;
+
+            if (priceA !== priceB) {
+                return (priceA - priceB) * direction;
+            }
+
+            // Equal prices keep their original relative order.
+            return originalCardIndex.get(a) - originalCardIndex.get(b);
+        });
     }
 
     return cards;
