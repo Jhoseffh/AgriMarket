@@ -178,6 +178,9 @@ class OrderController extends Controller
                 return $createdOrders;
             });
 
+            // The checkout selection has been used; clear it.
+            session()->forget('checkout_selection');
+
             return response()->json([
                 'success' => true,
                 'message' => count($result) . ' order(s) successfully submitted.',
@@ -193,9 +196,77 @@ class OrderController extends Controller
     }
 
 
-    // Display the order summary page for multiple products.
+    // ORDER SUMMARY - STEP 1 (POST /ordersummary)
+    // Receives the Buy Now product_id or the selected cart_ids, validates
+    // them, remembers the selection in the session, then redirects to the
+    // GET order summary page (Post/Redirect/Get). This keeps the page
+    // refreshable and prevents "GET method is not supported" errors.
     public function orderSummary(Request $request)
     {
+        // Cart checkout.
+        if ($request->filled('cart_ids')) {
+            $validator = Validator::make($request->all(), [
+                'cart_ids' => 'required|array|min:1',
+                'cart_ids.*' => 'required|integer|distinct',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()
+                    ->route('cart')
+                    ->with('error', 'Please select at least one valid product.');
+            }
+
+            session([
+                'checkout_selection' => [
+                    'type' => 'cart',
+                    'cart_ids' => array_map('intval', $request->input('cart_ids')),
+                ],
+            ]);
+
+            return redirect()->route('ordersummary.show');
+        }
+
+        // Direct Buy Now checkout.
+        if ($request->filled('product_id')) {
+            $validator = Validator::make($request->all(), [
+                'product_id' => 'required|integer|exists:products,product_id',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()
+                    ->route('shop')
+                    ->with('error', 'Product not found.');
+            }
+
+            session([
+                'checkout_selection' => [
+                    'type' => 'buy_now',
+                    'product_id' => (int) $request->input('product_id'),
+                ],
+            ]);
+
+            return redirect()->route('ordersummary.show');
+        }
+
+        return redirect()
+            ->route('shop')
+            ->with('error', 'Please select at least one product.');
+    }
+
+
+    // ORDER SUMMARY - STEP 2 (GET /ordersummary)
+    // Displays the order summary page for Buy Now or Cart checkout using
+    // the selection stored in the session by orderSummary().
+    public function showOrderSummary(Request $request)
+    {
+        $selection = session('checkout_selection');
+
+        if (!is_array($selection) || empty($selection['type'])) {
+            return redirect()
+                ->route('cart')
+                ->with('error', 'Please select a product to check out.');
+        }
+
         $buyerId = auth()->id();
 
         $buyer = DB::table('users')
@@ -203,7 +274,9 @@ class OrderController extends Controller
             ->first();
 
         if (!$buyer) {
-            return back()->with('error', 'Customer account not found.');
+            return redirect()
+                ->route('shop')
+                ->with('error', 'Customer account not found.');
         }
 
         $customerName = $buyer->real_name ?? '';
@@ -213,11 +286,14 @@ class OrderController extends Controller
         $items = collect();
 
         // Cart checkout.
-        if ($request->filled('cart_ids')) {
-            $validated = $request->validate([
-                'cart_ids' => 'required|array|min:1',
-                'cart_ids.*' => 'required|integer|distinct',
-            ]);
+        if ($selection['type'] === 'cart') {
+            $cartIds = array_values(array_unique($selection['cart_ids'] ?? []));
+
+            if (empty($cartIds)) {
+                return redirect()
+                    ->route('cart')
+                    ->with('error', 'Please select at least one product.');
+            }
 
             $cartItems = DB::table('carts')
                 ->join(
@@ -227,7 +303,7 @@ class OrderController extends Controller
                     'products.product_id'
                 )
                 ->where('carts.buyer_id', $buyerId)
-                ->whereIn('carts.cart_id', $validated['cart_ids'])
+                ->whereIn('carts.cart_id', $cartIds)
                 ->select(
                     'carts.cart_id',
                     'carts.seller_id',
@@ -242,86 +318,62 @@ class OrderController extends Controller
                 )
                 ->get();
 
-            if ($cartItems->count() !== count($validated['cart_ids'])) {
-                return back()->with(
-                    'error',
-                    'One or more selected cart products are no longer available.'
-                );
+            if ($cartItems->count() !== count($cartIds)) {
+                session()->forget('checkout_selection');
+
+                return redirect()
+                    ->route('cart')
+                    ->with(
+                        'error',
+                        'One or more selected cart products are no longer available.'
+                    );
             }
 
             foreach ($cartItems as $item) {
                 if ((int) $item->seller_id === (int) $buyerId) {
-                    return back()->with(
-                        'error',
-                        'You cannot order your own product.'
-                    );
+                    return redirect()
+                        ->route('cart')
+                        ->with('error', 'You cannot order your own product.');
                 }
 
                 if ($item->quantity <= 0) {
-                    return back()->with(
-                        'error',
-                        $item->product_name . ' is out of stock.'
-                    );
+                    return redirect()
+                        ->route('cart')
+                        ->with('error', $item->product_name . ' is out of stock.');
                 }
 
-                $shippingFee = session(
-                    'order_shipping_fee_' . $item->product_id
-                );
-
-                if ($shippingFee === null) {
-                    $shippingFee = random_int(10, 30);
-
-                    session([
-                        'order_shipping_fee_' . $item->product_id => $shippingFee
-                    ]);
-                }
-
-                $item->shipping_fee = (float) $shippingFee;
+                $item->shipping_fee = $this->getShippingFee($item->product_id);
                 $item->order_quantity = 1;
 
                 $items->push($item);
             }
         }
 
-        // Direct Buy Now checkout remains supported.
-        elseif ($request->filled('product_id')) {
-            $validated = $request->validate([
-                'product_id' => 'required|integer|exists:products,product_id',
-            ]);
-
+        // Direct Buy Now checkout.
+        elseif ($selection['type'] === 'buy_now') {
             $product = Product::where(
                 'product_id',
-                $validated['product_id']
+                $selection['product_id'] ?? 0
             )->first();
 
             if (!$product) {
-                return back()->with('error', 'Product not found.');
+                session()->forget('checkout_selection');
+
+                return redirect()
+                    ->route('shop')
+                    ->with('error', 'Product not found.');
             }
 
             if ((int) $product->seller_id === (int) $buyerId) {
-                return back()->with(
-                    'error',
-                    'You cannot order your own product.'
-                );
+                return redirect()
+                    ->route('shop')
+                    ->with('error', 'You cannot order your own product.');
             }
 
             if ($product->quantity <= 0) {
-                return back()->with(
-                    'error',
-                    'This product is currently out of stock.'
-                );
-            }
-
-            $shippingFee = session(
-                'order_shipping_fee_' . $product->product_id
-            );
-
-            if ($shippingFee === null) {
-                $shippingFee = random_int(10, 30);
-
-                session([
-                    'order_shipping_fee_' . $product->product_id => $shippingFee
-                ]);
+                return redirect()
+                    ->route('shop')
+                    ->with('error', 'This product is currently out of stock.');
             }
 
             $product->cart_id = null;
@@ -329,17 +381,18 @@ class OrderController extends Controller
                 ->where('id', $product->seller_id)
                 ->value('real_name');
 
-            $product->shipping_fee = (float) $shippingFee;
+            $product->shipping_fee = $this->getShippingFee($product->product_id);
             $product->order_quantity = 1;
 
             $items->push($product);
         }
 
         else {
-            return back()->with(
-                'error',
-                'Please select at least one product.'
-            );
+            session()->forget('checkout_selection');
+
+            return redirect()
+                ->route('shop')
+                ->with('error', 'Please select at least one product.');
         }
 
         return view('order.ordersummary', compact(
@@ -348,6 +401,24 @@ class OrderController extends Controller
             'mobileNumber',
             'deliveryAddress'
         ));
+    }
+
+
+    // Get (or create once per session) the shipping fee of a product.
+    // storeOrder() reads the same session key, so the fee shown on the
+    // order summary page is the fee saved with the order.
+    private function getShippingFee($productId): float
+    {
+        $key = 'order_shipping_fee_' . $productId;
+
+        $shippingFee = session($key);
+
+        if ($shippingFee === null) {
+            $shippingFee = random_int(10, 30);
+            session([$key => $shippingFee]);
+        }
+
+        return (float) $shippingFee;
     }
 
 

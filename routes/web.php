@@ -47,9 +47,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/orders/products/{productId}', [OrderController::class, 'removeProduct'])
         ->name('orders.products.remove');
 
-    // Order Summary page
+    // Order Summary - receive Buy Now / Cart selection (POST), then redirect
     Route::post('/ordersummary', [OrderController::class, 'orderSummary'])
         ->name('ordersummary');
+
+    // Order Summary page (GET) - safe to refresh or open directly
+    Route::get('/ordersummary', [OrderController::class, 'showOrderSummary'])
+        ->name('ordersummary.show');
 
     // Store order request
     Route::post('/orders/store', [OrderController::class, 'storeOrder'])
