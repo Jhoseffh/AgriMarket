@@ -47,3 +47,30 @@ Laravel Cloud connects to the project's GitHub repository to retrieve the applic
 
 Laravel Cloud makes deployment and maintenance easier by providing application hosting, managed database services, and production environment configuration. When developers make changes to AgriMarket, they commit and push the updates to GitHub. If automatic deployment is enabled, Laravel Cloud detects the changes and deploys the updated application without manually uploading the files.
 
+## 6. Deployment Steps
+
+AgriMarket is deployed using Laravel Cloud. The deployment process connects the GitHub repository to Laravel Cloud, configures the application, and makes the website accessible online.
+
+### Steps:
+
+1. **Prepare the Application** – Make sure the application works properly on the local development environment and that all changes are committed to Git.
+
+2. **Push Changes to GitHub** – Push the latest project changes to the GitHub repository so Laravel Cloud can access the application code.
+
+3. **Connect GitHub to Laravel Cloud** – Log in to Laravel Cloud and connect the GitHub repository containing AgriMarket.
+
+4. **Configure the Application** – Select the repository and branch to deploy. Set the required environment variables, including the database connection details and other application settings.
+
+5. **Set Up the Production Database** – Configure the database that the deployed application will use. Make sure its connection details match the application's environment settings.
+
+6. **Run Database Migrations** – Run Laravel's migration command to create the required database tables in the production database.
+
+   ```bash
+   php artisan migrate --force
+   ```
+
+7. **Deploy the Application** – Start the deployment through Laravel Cloud. It will prepare the application using the configured deployment process.
+
+8. **Test the Live Website** – Open the deployed URL and check whether the main features work properly, including user authentication, product browsing, shopping cart, and order processing.
+
+After deployment, AgriMarket can be accessed through its live website URL. Future updates can also be deployed through Laravel Cloud when the connected GitHub branch receives new changes, if automatic deployment is enabled.
