@@ -63,8 +63,8 @@ AgriMarket is deployed using Laravel Cloud. The deployment process connects the 
 
 5. **Set Up the Production Database** – Configure the database that the deployed application will use. Make sure its connection details match the application's environment settings.
 
-7. **Deploy the Application** – Start the deployment through Laravel Cloud. It will prepare the application using the configured deployment process.
+6. **Deploy the Application** – Start the deployment through Laravel Cloud. It will prepare the application using the configured deployment process.
 
-8. **Test the Live Website** – Open the deployed URL and check whether the main features work properly, including user authentication, product browsing, shopping cart, and order processing.
+7. **Test the Live Website** – Open the deployed URL and check whether the main features work properly, including user authentication, product browsing, shopping cart, and order processing.
 
 After deployment, AgriMarket can be accessed through its live website URL. Future updates can also be deployed through Laravel Cloud when the connected GitHub branch receives new changes, if automatic deployment is enabled.
