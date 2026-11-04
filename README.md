@@ -67,4 +67,4 @@ AgriMarket is deployed using Laravel Cloud. The deployment process connects the 
 
 7. **Test the Live Website** – Open the deployed URL and check whether the main features work properly, including user authentication, product browsing, shopping cart, and order processing.
 
-After deployment, AgriMarket can be accessed through its live website URL. Future updates can also be deployed through Laravel Cloud when the connected GitHub branch receives new changes, if automatic deployment is enabled.
+After deployment, AgriMarket can be accessed through its live website: https://agrimarket-production-steboa.laravel.cloud/
