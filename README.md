@@ -63,12 +63,6 @@ AgriMarket is deployed using Laravel Cloud. The deployment process connects the 
 
 5. **Set Up the Production Database** – Configure the database that the deployed application will use. Make sure its connection details match the application's environment settings.
 
-6. **Run Database Migrations** – Run Laravel's migration command to create the required database tables in the production database.
-
-   ```bash
-   php artisan migrate --force
-   ```
-
 7. **Deploy the Application** – Start the deployment through Laravel Cloud. It will prepare the application using the configured deployment process.
 
 8. **Test the Live Website** – Open the deployed URL and check whether the main features work properly, including user authentication, product browsing, shopping cart, and order processing.
