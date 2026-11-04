@@ -1,59 +1,92 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# AgriMarket
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**AgriMarket** is an agricultural e-commerce website developed using Laravel. It allows users to buy and sell agricultural products using one account. This means that a user does not need a separate account to become a seller or a buyer.The main purpose of AgriMarket is to help farmers and other agricultural sellers sell their products directly to customers. Through this platform, buyers can purchase products without depending too much on middlemen or other intermediaries that may increase the final price of agricultural products. The system provides an online marketplace where sellers can post their products, while buyers can browse products, add them to their shopping cart, and place orders.
 
-## About Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Technologies Used
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Technology    | Purpose                                                             |
+| ------------- | ------------------------------------------------------------------- |
+| Laravel 12    | Used to develop the main system and handle its backend functions.   |
+| PHP           | Used for the system's programming logic.                            |
+| MySQL         | Used to store user, product, cart, and order information.           |
+| HTML          | Used to structure the website pages.                                |
+| CSS           | Used to design the appearance of the website.                       |
+| JavaScript    | Used to make website features interactive.                          |
+| Blade         | Used to display dynamic information on website pages.               |
+| Git           | Used to track changes and manage different versions of the project. |
+| GitHub        | Used to store the project's source code online.                     |
+| Laravel Cloud | Used to host the system and its production database online.         |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+## 2. How the Laravel System Works
+AgriMarket uses Laravel's Model-View-Controller (MVC) structure to organize the system. It separates the application into different parts, each with its own purpose.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+How the System Works:
+User → Route → Controller → Model → Database → View
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+The user interacts with the website through a browser, such as logging in, browsing products, or placing orders. The Route receives the request and directs it to the correct Controller, which handles the request and decides what action to perform. The Model communicates with the Database to retrieve or save information such as users, products, carts, and orders. Finally, the View, using Laravel Blade, displays the result on the website.
 
-## Laravel Sponsors
+## 3. Database Management and Migrations
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+AgriMarket uses MySQL to store important system information. During development, the database runs locally using XAMPP, while the deployed application connects to its production database through Laravel Cloud. Laravel migrations are PHP files used to create or modify database tables through code instead of creating them manually. For example, AgriMarket uses migrations to create a products table that stores product names, prices, quantities, categories, images, and seller information.
 
-### Premium Partners
+## 4. Git Branches
+- auth-shop-setup – Handles user authentication and the initial setup of the shop page.
+- image-database-configuration – Handles product image storage and database configuration.
+- main – The primary branch containing the main version of the project.
+- order-setup – Handles the setup of the ordering system, including order processing and management.
+- system-finalization – Handles final improvements, fixes, and integration of system features.
+- user-configuration – Handles user-related settings, profiles, and account configurations.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 5. What Is Laravel Cloud?
 
-## Contributing
+[Laravel Cloud](https://cloud.laravel.com/) is a hosting platform designed for Laravel applications. It provides the online environment needed to run a Laravel website without manually setting up a server. AgriMarket uses Laravel Cloud to make the application accessible through the internet.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Laravel Cloud connects to the project's GitHub repository to retrieve the application files. When a deployment starts, it gets the selected branch, installs the required dependencies, and runs the configured deployment commands. Once successful, the updated version of AgriMarket becomes available online.
 
-## Code of Conduct
+Laravel Cloud makes deployment and maintenance easier by providing application hosting, managed database services, and production environment configuration. When developers make changes to AgriMarket, they commit and push the updates to GitHub. If automatic deployment is enabled, Laravel Cloud detects the changes and deploys the updated application without manually uploading the files.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 6. Project Folder Structure
 
-## Security Vulnerabilities
+Laravel organizes its files into different folders. Each folder has its own purpose.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Here are some of the important folders used in AgriMarket:
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Ecommerce/
+│
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   │       └── Controllers handle system requests.
+│   │
+│   └── Models/
+│       └── Models communicate with the database.
+│
+├── database/
+│   ├── migrations/
+│   │   └── Database table instructions.
+│   │
+│   └── seeders/
+│       └── Used to insert initial database records.
+│
+├── public/
+│   └── image/
+│       └── Stores publicly accessible product images.
+│
+├── resources/
+│   └── views/
+│       └── Contains the website pages and Blade files.
+│
+├── routes/
+│   └── web.php
+│       └── Contains the website routes.
+│
+├── .env.example
+│   └── Example environment configuration.
+│
+├── artisan
+│   └── Laravel command-line tool.
+│
+└── README.md
+    └── Project documentation.
